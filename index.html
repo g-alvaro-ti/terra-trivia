@@ -7,6 +7,110 @@
     <title>Global Trivia</title>
 </head>
 <body>
+    <header>
+        <h1>Global Trivia</h1>
+    </header>
+
+    <section id="inicio">
+        <div class="texto-introducao">
+
+        </div>
+        <div class="selecionar-idioma">
+            <h3>Selecione o idioma das perguntas:</h2>
+            <label>
+                <input type="radio" name="idioma" value="english">
+                Inglês
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="portuguese">
+                Português
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="spanish">
+                Espanhol
+            </label>
+        </div>
+        <div class="selecionar-tema">
+            <h3>Selecione o tema das perguntas:</h2>
+            <label>
+                <input type="radio" name="idioma" value="tema-general-knowledge">
+                Conhecimento Geral
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="tema-science">
+                Ciência e Natureza
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="tema-computers">
+                Computadores
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="tema-history">
+                História
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="tema-geography">
+                Geografia
+            </label>
+        </div>
+        <div class="selecionar-dificuldade">
+            <h3>Selecione a dificuldade das perguntas:</h2>
+            <label>
+                <input type="radio" name="idioma" value="dificuldade-facil">
+                Fácil
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="dificuldade-medio">
+                Médio
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="dificuldade-dificil">
+                Difícil
+            </label>
+        </div>
+        <div class="iniciar-jogo">
+            <button class="botao-iniciar-jogo">
+                Iniciar Jogo
+            </button>
+        </div>
+    </section>
+    
+    <section id="jogo">
+        <h2 class="pergunta">
+            Pergunta
+        </h2>
+        <div class="respostas">
+            <label>
+                <input type="radio" name="idioma" value="r1">
+                Resposta 1
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="r2">
+                Resposta 2
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="r3">
+                Resposta 3
+            </label>
+            <label>
+                <input type="radio" name="idioma" value="r4">
+                Resposta 4
+            </label>
+        </div>
+        
+    </section>
+
+    <footer id="stats">
+        <ul>
+            <li class="iniciar"><button>Encerrar jogo</button></li>
+            <li class="perguntas">Pergunta: 1/5</li>
+            <li class="erros">Perguntas erradas: 0</li>
+            <li class="acertos">Perguntas acertadas: 0</li>
+            <li class="Tempo">Tempo total: 0.0s</li>
+        </ul>
+    </footer>
+
     <script src="src/script.js"></script>
+    
 </body>
 </html>
