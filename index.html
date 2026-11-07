@@ -4,55 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <title>Global Trivia</title>
+    <title>Terra Trivia</title>
 </head>
 <body>
     <header>
-        <h1>Global Trivia</h1>
+        <h1>Terra Trivia</h1>
     </header>
 
     <section id="inicio">
+
         <div class="texto-introducao">
 
         </div>
-        <div class="selecionar-idioma">
-            <h3>Selecione o idioma das perguntas:</h2>
-            <label>
-                <input type="radio" name="idioma" value="english">
-                Inglês
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="portuguese">
-                Português
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="spanish">
-                Espanhol
-            </label>
-        </div>
-        <div class="selecionar-tema">
-            <h3>Selecione o tema das perguntas:</h2>
-            <label>
-                <input type="radio" name="idioma" value="tema-general-knowledge">
-                Conhecimento Geral
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="tema-science">
-                Ciência e Natureza
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="tema-computers">
-                Computadores
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="tema-history">
-                História
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="tema-geography">
-                Geografia
-            </label>
-        </div>
+
         <div class="selecionar-dificuldade">
             <h3>Selecione a dificuldade das perguntas:</h2>
             <label>
@@ -68,36 +32,93 @@
                 Difícil
             </label>
         </div>
+
+        <div class="selecionar-api">
+            <h3>Insira uma Chave API do Gemini:</h3>
+            <p>
+                O Gemini é usado nesse site pra te dar explicações dinâmicas pras suas perguntas após cada partida, e também recomendar links para leitura.
+                <a href="https://aistudio.google.com/api-keys" target="_blank">Consiga sua Chave API aqui</a>
+            </p>
+            <input type="text" name="api" class="input-api-key">
+        </div>
+
         <div class="iniciar-jogo">
             <button class="botao-iniciar-jogo">
                 Iniciar Jogo
             </button>
         </div>
+        
     </section>
     
     <section id="jogo">
-        <h2 class="pergunta">
-            Pergunta
-        </h2>
-        <div class="respostas">
-            <label>
-                <input type="radio" name="idioma" value="r1">
-                Resposta 1
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="r2">
-                Resposta 2
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="r3">
-                Resposta 3
-            </label>
-            <label>
-                <input type="radio" name="idioma" value="r4">
-                Resposta 4
-            </label>
+
+        <div class="pergunta">
+            <h2 class="enunciado-pergunta">
+                Pergunta
+            </h2>
+
+            <div class="respostas">
+                <label>
+                    <input type="radio" name="idioma" value="r1">
+                    Resposta 1
+                </label>
+                <label>
+                    <input type="radio" name="idioma" value="r2">
+                    Resposta 2
+                </label>
+                <label>
+                    <input type="radio" name="idioma" value="r3">
+                    Resposta 3
+                </label>
+                <label>
+                    <input type="radio" name="idioma" value="r4">
+                    Resposta 4
+                </label>
+            </div>
+
         </div>
         
+    </section>
+
+    <section id="fim-jogo">
+        <div class="fim-texto">
+            <h2>
+                Fim de jogo!
+            </h2>
+            <p>
+                Veja como você se saiu em cada pergunta:
+            </p>
+
+        </div>
+
+
+        <div class="pergunta-correcao">
+            <h2 class="enunciado-pergunta">
+                Pergunta
+            </h2>
+
+            <div class="certo-ou-errado">
+                Incorreto!
+            </div>
+
+            <div class="resposta-escolhida">
+                Resposta 1
+            </div>
+
+            <div class="resposta-certa">
+                Resposta 3
+            </div>
+
+            <div class="correcao-card">
+                <div class="correcao-gemini">
+                    Explicação do Gemini
+                </div>
+                <div class="correcao-leitura">
+                    Leia mais: <a>Link da Wikipedia</a>
+                </div>
+            </div>
+        </div>
+
     </section>
 
     <footer id="stats">
