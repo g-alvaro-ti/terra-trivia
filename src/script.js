@@ -1,13 +1,13 @@
 // Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe as 5 perguntas na página.
-async function iniciar_jogo(){
+async function iniciarJogo(){
     console.log("Botão pressionado!")
-    perguntas = await chamar_api_trivia("medium")
+    perguntas = await chamarApiTrivia("medium")
     console.log("API processada!")
     processarPerguntas(perguntas)
 }
 
 // Exibe a tela de fim de jogo, e chama as APIs do Gemini e REST pra correção das perguntas.
-function terminar_jogo(){
+function terminarJogo(){
 
 }
 
@@ -19,12 +19,12 @@ let chaves_gemini = []
 let chave_gemini_atual = ""
 
 // Adiciona a chave do input à lista de Chaves API, com validação
-function adicionar_chave(chave){
+function adicionarChave(chave){
 
 }
 
 // Redefine a Chave API usada atualmente para a próxima chave da lista
-function obter_proxima_chave(){
+function obterProximaChave(){
 
 }
 
@@ -57,7 +57,7 @@ perguntas = []
 }
 */
 // https://opentdb.com/api_config.php
-async function chamar_api_trivia(dificuldade = "easy"){
+async function chamarApiTrivia(dificuldade = "easy"){
     if(dificuldade != "easy" && dificuldade != "medium" && dificuldade != "hard"){
         dificuldade = "easy"
     }
@@ -156,19 +156,19 @@ function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta){
 // ========================================
 
 // Monta e retorna um prompt com o contexto da resposta do usuário, para ser usado com o Gemini
-function criar_prompt_correcao(enunciado, resposta_certa, resposta_errada){
+function criarPromptCorrecao(enunciado, resposta_certa, resposta_errada){
     const promptCorrecao = `
 
     `
 }
 
 // Faz a chamada pra API do Gemini usando o prompt passado no parâmetro, e retorna o texto gerado.
-async function chamar_api_gemini(prompt){
+async function chamarApiGemini(prompt){
 
 }
 
 // Faz a chamada pra API Rest, para retornar parte do conteúdo de uma página
-async function chamar_api_wikipedia(){
+async function chamarApiWikipedia(){
 
 }
 
