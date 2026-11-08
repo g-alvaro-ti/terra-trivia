@@ -1,13 +1,33 @@
 // Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe as 5 perguntas na página.
 async function iniciarJogo(){
     console.log("Botão pressionado!")
+
+    respostas_usuario = []
     perguntas = await chamarApiTrivia("medium")
+
     console.log("API processada!")
     processarPerguntas(perguntas)
 }
 
 // Exibe a tela de fim de jogo, e chama as APIs do Gemini e REST pra correção das perguntas.
 function terminarJogo(){
+
+    console.log("Fim de jogo!");
+
+    console.log("Respostas registradas:");
+
+    respostas_usuario.forEach(resposta => {
+
+        const acertou = resposta.resposta_usuario === resposta.resposta_certa;
+
+        console.log(`Pergunta ${resposta.numero}`);
+        console.log("Enunciado:", resposta.enunciado);
+        console.log("Resposta do usuário:", resposta.resposta_usuario);
+        console.log("Resposta correta:", resposta.resposta_certa);
+        console.log("Acertou?", acertou);
+
+        console.log("----------------------");
+    });
 
 }
 
@@ -33,6 +53,7 @@ function obterProximaChave(){
 // ========================================
 
 perguntas = []
+respostas_usuario = []
 
 // Faz a chamada pra API do OpenTDB
 // Recebe um parâmetro dificuldade, que pode ser easy, medium ou hard
@@ -80,6 +101,30 @@ async function chamarApiTrivia(dificuldade = "easy"){
     }
 }
 
+// Recebe os dados de uma pergunta respondida pelo usuário,
+// E as adiciona à lista de respostas, contendo a resposta escolhida e a resposta correta
+function registrarResposta(numero_pergunta, enunciado, resposta_usuario, resposta_certa){
+
+    // Verifica se essa pergunta já possui uma resposta registrada
+    const indice = respostas_usuario.findIndex(resposta => resposta.numero === numero_pergunta);
+
+    const nova_resposta = {
+        numero: numero_pergunta,
+        enunciado: enunciado,
+        resposta_usuario: resposta_usuario,
+        resposta_certa: resposta_certa
+    };
+
+    // Se já respondeu, atualiza a resposta
+    if(indice !== -1){
+        respostas_usuario[indice] = nova_resposta;
+    }
+    // Caso contrário, adiciona ao array
+    else{
+        respostas_usuario.push(nova_resposta);
+    }
+}
+
 function processarPerguntas(perguntas){
     let numero_pergunta = 1
     perguntas.results.forEach((pergunta, index) => {
@@ -110,14 +155,15 @@ function processarPerguntas(perguntas){
         criarCardPergunta(
             pergunta.question,
             lista_alternativas,
-            numero_pergunta
+            numero_pergunta,
+            pergunta.correct_answer
         );
         numero_pergunta++
     });
 }
 
 // Cria o elemento HTML da pergunta com o enunciado e alternativas
-function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta){
+function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta, resposta_certa){
     const secaoJogo = document.querySelector("#jogo")
     const pergunta = document.createElement("div");
     pergunta.classList.add("pergunta")
@@ -136,6 +182,18 @@ function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta){
         input.type = "radio";
         input.name = `pergunta-${numero_pergunta}`;
         input.value = `r${index + 1}`;
+
+         // Executa quando o usuário seleciona uma alternativa
+        input.addEventListener("change", () => {
+
+            registrarResposta(
+                numero_pergunta,
+                enunciado,
+                alternativa,
+                resposta_certa
+            );
+
+        });
 
         label.appendChild(input);
         label.appendChild(document.createTextNode(" " + alternativa));
