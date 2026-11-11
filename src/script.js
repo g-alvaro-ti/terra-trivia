@@ -1,18 +1,32 @@
-// Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe as 5 perguntas na página.
-async function iniciarJogo(){
-    console.log("Botão pressionado!")
+// Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe a primeira pergunta
+async function iniciarJogo() {
+    console.log("Botão pressionado!");
+
+    // Ajusta a visibilidade das telas
+    ocultarElemento("#inicio", true);
+    ocultarElemento("#fim-jogo", true);
+    ocultarElemento("#jogo", false);
+    ocultarElemento("#stats", false);
 
     respostas_usuario = []
-    perguntas = await chamarApiTrivia("medium")
+    indice_pergunta_atual = 0;
+
+    const dados = await chamarApiTrivia("medium");
+    perguntas = dados.results;
 
     console.log("API processada!")
-    processarPerguntas(perguntas)
+    exibirPerguntaAtual();
 }
 
 // Exibe a tela de fim de jogo, e chama as APIs do Gemini e REST pra correção das perguntas.
 function terminarJogo(){
 
     console.log("Fim de jogo!");
+
+    // Oculta a tela de perguntas e exibe o encerramento
+    ocultarElemento("#jogo", true);
+    ocultarElemento("#fim-jogo", false);
+    ocultarElemento("#stats", true);
 
     console.log("Respostas registradas:");
 
@@ -30,6 +44,25 @@ function terminarJogo(){
     });
 
 }
+
+// ========================================
+// Controle de visibilidade da página
+// ========================================
+
+function ocultarElemento(seletor, status = true){
+    let elemento = document.querySelector(seletor)
+    elemento.classList.toggle("hidden", status)
+}
+
+// Define o estado inicial da página assim que o script carrega
+function configurarTelasIniciais() {
+    ocultarElemento("#inicio", false);
+    ocultarElemento("#jogo", true);
+    ocultarElemento("#fim-jogo", true);
+    ocultarElemento("#stats", true);
+}
+
+configurarTelasIniciais()
 
 // ========================================
 // Input das Chaves API e Rodízio
@@ -163,14 +196,15 @@ function processarPerguntas(perguntas){
 }
 
 // Cria o elemento HTML da pergunta com o enunciado e alternativas
-function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta, resposta_certa){
-    const secaoJogo = document.querySelector("#jogo")
+function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta, resposta_certa) {
+    const secaoJogo = document.querySelector("#jogo");
     const pergunta = document.createElement("div");
     pergunta.classList.add("pergunta")
 
     const titulo = document.createElement("h2");
     titulo.classList.add("enunciado-pergunta")
-    titulo.textContent = enunciado
+    // Usando innerHTML para decodificar entidades HTML da OpenTDB (ex: &quot;, &#039;)
+    titulo.innerHTML = enunciado;
 
     const respostas = document.createElement("div");
     respostas.classList.add("respostas")
@@ -193,10 +227,22 @@ function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta, respo
                 resposta_certa
             );
 
+            // Delay de 500ms para o usuário ver a seleção antes de trocar a tela
+            setTimeout(() => {
+                indice_pergunta_atual++;
+                if (indice_pergunta_atual < perguntas.length) {
+                    exibirPerguntaAtual();
+                } else {
+                    terminarJogo();
+                }
+            }, 500);
         });
 
         label.appendChild(input);
-        label.appendChild(document.createTextNode(" " + alternativa));
+        // innerHTML para também decodificar entidades especiais nas alternativas
+        const textoAlternativa = document.createElement("span");
+        textoAlternativa.innerHTML = " " + alternativa;
+        label.appendChild(textoAlternativa);
 
         respostas.appendChild(label);
     })
@@ -207,6 +253,34 @@ function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta, respo
 
     // Adiciona a pergunta à seção do jogo
     secaoJogo.appendChild(pergunta);
+}
+
+// Renderiza somente a pergunta correspondente ao índice atual
+function exibirPerguntaAtual() {
+    const secaoJogo = document.querySelector("#jogo");
+    secaoJogo.innerHTML = ""; // Limpa a pergunta anterior da tela
+
+    // Se já respondeu todas, encerra o jogo
+    if (indice_pergunta_atual >= perguntas.length) {
+        terminarJogo();
+        return;
+    }
+
+    const pergunta = perguntas[indice_pergunta_atual];
+    const numero_pergunta = indice_pergunta_atual + 1;
+
+    // Sorteia a posição da alternativa correta entre as 4
+    const lista_alternativas = [...pergunta.incorrect_answers];
+    const indice_resposta_certa = Math.floor(Math.random() * 4);
+    lista_alternativas.splice(indice_resposta_certa, 0, pergunta.correct_answer);
+
+    // Cria o card da pergunta atual
+    criarCardPergunta(
+        pergunta.question,
+        lista_alternativas,
+        numero_pergunta,
+        pergunta.correct_answer
+    );
 }
 
 // ========================================
