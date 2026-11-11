@@ -108,7 +108,27 @@ function adicionarChave(chave){
 
 // Redefine a Chave API usada atualmente para a próxima chave da lista
 function obterProximaChave(){
+    if (chaves_gemini.length === 0) {
+        console.warn("Nenhuma chave API cadastrada na lista.");
+        chave_gemini_atual = "";
+        return null;
+    }
 
+    // Localiza o índice da chave atual na lista
+    const indiceAtual = chaves_gemini.indexOf(chave_gemini_atual);
+
+    // Se a chave atual não estiver na lista ou for a primeira execução, pega o índice 0;
+    // Caso contrário, avança 1 posição usando o operador módulo (%) para voltar ao índice 0 após a última
+    if (indiceAtual === -1) {
+        const proximoIndice = 0
+    }else{
+        const proximoIndice = (indiceAtual + 1) % chaves_gemini.length;
+    }
+
+    chave_gemini_atual = chaves_gemini[proximoIndice];
+
+    console.log(`Rodízio: utilizando a chave ${proximoIndice + 1} de ${chaves_gemini.length}`);
+    return chave_gemini_atual;
 }
 
 let botaoInserirChave = document.querySelector(".botao-inserir-chave");
