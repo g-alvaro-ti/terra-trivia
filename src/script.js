@@ -73,13 +73,55 @@ let chave_gemini_atual = ""
 
 // Adiciona a chave do input à lista de Chaves API, com validação
 function adicionarChave(chave){
+    if (!chave || typeof chave !== "string") {
+        console.warn("Nenhuma chave informada.");
+        return false;
+    }
 
+    const chaveFormatada = chave.trim();
+
+    // Regex para Chaves API do Gemini do tipo legado (AIzaSy...) ou tipo novo (AQ....)
+    const regexGoogleKey = /^(AIzaSy[a-zA-Z0-9_-]{33}|AQ\.[a-zA-Z0-9_-]{20,})$/;
+
+    if (!regexGoogleKey.test(chaveFormatada)) {
+        console.error("Falha ao adicionar: A chave não possui um formato válido do Gemini (deve iniciar com 'AIzaSy' ou 'AQ.').");
+        return false;
+    }
+
+    // Evita chaves repetidas
+    if (chaves_gemini.includes(chaveFormatada)) {
+        console.warn("A chave informada já foi adicionada anteriormente.");
+        return false;
+    }
+
+    // Insere na lista
+    chaves_gemini.push(chaveFormatada);
+
+    // Se for a primeira chave inserida, já define como a chave atual
+    if (!chave_gemini_atual) {
+        chave_gemini_atual = chaveFormatada;
+    }
+
+    console.log(`Chave API adicionada com sucesso! Total cadastradas: ${chaves_gemini.length}`);
+    return true;
 }
 
 // Redefine a Chave API usada atualmente para a próxima chave da lista
 function obterProximaChave(){
 
 }
+
+let botaoInserirChave = document.querySelector(".botao-inserir-chave");
+let inputApiKey = document.querySelector(".input-api-key");
+
+botaoInserirChave.addEventListener("click", () => {
+    const chave = inputApiKey.value;
+    const sucesso = adicionarChave(chave);
+
+    if (sucesso) {
+        inputApiKey.value = ""; // Limpa o campo após inserir com sucesso
+    }
+});
 
 // ========================================
 // Inicio de jogo e exibição das perguntas
@@ -288,10 +330,19 @@ function exibirPerguntaAtual() {
 // ========================================
 
 // Monta e retorna um prompt com o contexto da resposta do usuário, para ser usado com o Gemini
+function criarPromptWikipedia(enunciado, resposta_certa, resposta_errada){
+    const promptWikipedia = `
+
+    `
+    return promptWikipedia
+}
+
+// Monta e retorna um prompt com o contexto da resposta do usuário, para ser usado com o Gemini
 function criarPromptCorrecao(enunciado, resposta_certa, resposta_errada){
     const promptCorrecao = `
 
     `
+    return promptCorrecao
 }
 
 // Faz a chamada pra API do Gemini usando o prompt passado no parâmetro, e retorna o texto gerado.
