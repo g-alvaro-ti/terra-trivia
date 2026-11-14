@@ -19,30 +19,21 @@ async function iniciarJogo() {
 }
 
 // Exibe a tela de fim de jogo, e chama as APIs do Gemini e REST pra correção das perguntas.
-function terminarJogo(){
-
-    console.log("Fim de jogo!");
-
+async function terminarJogo() {
     // Oculta a tela de perguntas e exibe o encerramento
     ocultarElemento("#jogo", true);
     ocultarElemento("#fim-jogo", false);
     ocultarElemento("#stats", true);
 
-    console.log("Respostas registradas:");
+    try {
+        const correcoes = await processarCorrecoesComGemini(respostas_usuario);
+        console.log("JSON com explicações e links da Wikipédia:", correcoes);
 
-    respostas_usuario.forEach(resposta => {
-
-        const acertou = resposta.resposta_usuario === resposta.resposta_certa;
-
-        console.log(`Pergunta ${resposta.numero}`);
-        console.log("Enunciado:", resposta.enunciado);
-        console.log("Resposta do usuário:", resposta.resposta_usuario);
-        console.log("Resposta correta:", resposta.resposta_certa);
-        console.log("Acertou?", acertou);
-
-        console.log("----------------------");
-    });
-
+        // TODO: chamar a função criarCardCorrecao()
+    } catch (erro) {
+        // TODO: elaborar um elemento HTML pra exibir o erro
+        console.error("Falha ao obter correções do Gemini:", erro);
+    }
 }
 
 // ========================================
@@ -116,13 +107,14 @@ function obterProximaChave(){
 
     // Localiza o índice da chave atual na lista
     const indiceAtual = chaves_gemini.indexOf(chave_gemini_atual);
+    let proximoIndice;
 
     // Se a chave atual não estiver na lista ou for a primeira execução, pega o índice 0;
     // Caso contrário, avança 1 posição usando o operador módulo (%) para voltar ao índice 0 após a última
     if (indiceAtual === -1) {
-        const proximoIndice = 0
+        proximoIndice = 0
     }else{
-        const proximoIndice = (indiceAtual + 1) % chaves_gemini.length;
+        proximoIndice = (indiceAtual + 1) % chaves_gemini.length;
     }
 
     chave_gemini_atual = chaves_gemini[proximoIndice];
@@ -355,19 +347,6 @@ function criarPromptWikipedia(enunciado, resposta_certa, resposta_errada){
 
     `
     return promptWikipedia
-}
-
-// Monta e retorna um prompt com o contexto da resposta do usuário, para ser usado com o Gemini
-function criarPromptCorrecao(enunciado, resposta_certa, resposta_errada){
-    const promptCorrecao = `
-
-    `
-    return promptCorrecao
-}
-
-// Faz a chamada pra API do Gemini usando o prompt passado no parâmetro, e retorna o texto gerado.
-async function chamarApiGemini(prompt){
-
 }
 
 // Faz a chamada pra API Rest, para retornar parte do conteúdo de uma página
