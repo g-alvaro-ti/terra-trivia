@@ -1,12 +1,21 @@
 const FLASK_API_URL = "http://127.0.0.1:5000/api/wiki-context";
+const FLASK_HEALTH_URL = "http://127.0.0.1:5000/api/health";
 dados_scraping = []
 
 let dificuldade_selecionada = "easy";
+let api_rest_ativa = false;
 
 // Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe a primeira pergunta
 async function iniciarJogo() {
     console.log("Botão pressionado!");
     dificuldade_selecionada = obterDificuldadeSelecionada();
+
+    // Verifica se a API Rest está em execução,
+    // E exibe um aviso tanto se a Rest estiver ausente ou se não tiver Chaves API
+    const verificacaoRest = verificarApiRestAtiva().then((restAtiva) => {
+        exibirAvisoConexoes(restAtiva, verificarChaveApiCadastrada());
+        return restAtiva;
+    });
 
     // Ajusta a visibilidade das telas
     ocultarElemento("#inicio", true);
@@ -18,7 +27,11 @@ async function iniciarJogo() {
     dados_scraping = [];
     indice_pergunta_atual = 0;
 
-    const dados = await chamarApiTrivia(dificuldade_selecionada);
+    // Espera a verificação da API Rest e a resposta da API do OpenTrivia
+    const [, dados] = await Promise.all([
+        verificacaoRest,
+        chamarApiTrivia(dificuldade_selecionada)
+    ]);
     perguntas = dados.results;
 
     console.log("API processada!")
@@ -38,9 +51,20 @@ async function terminarJogo() {
     const statusElemento = document.querySelector("#status-fim-jogo");
     const resumoElemento = document.querySelector("#resumo-desempenho");
     const listaElemento = document.querySelector("#lista-correcoes");
+    const tempoTotalSegundos = inicio_partida_ms
+        ? Number(((Date.now() - inicio_partida_ms) / 1000).toFixed(1))
+        : 0;
 
     resumoElemento.innerHTML = "";
     listaElemento.innerHTML = "";
+
+    // Se faltar API Rest ou chave do Gemini, exibe apenas as correções básicas
+    if (!api_rest_ativa || !verificarChaveApiCadastrada()) {
+        ocultarElemento("#status-fim-jogo", true);
+        renderizarCorrecoesSemApi(respostas_usuario, tempoTotalSegundos);
+        return;
+    }
+
     ocultarElemento("#status-fim-jogo", false);
     statusElemento.textContent = "Finalizando coleta de dados na Wikipédia e consultando Gemini...";
 
@@ -61,15 +85,16 @@ async function terminarJogo() {
         // Chama o Gemini
         const analiseGemini = await processarCorrecoesComGemini(respostasComWiki, {
             dificuldade: dificuldade_selecionada,
-            tempo_total_segundos: Number(((Date.now() - inicio_partida_ms) / 1000).toFixed(1))
+            tempo_total_segundos: tempoTotalSegundos
         });
 
         ocultarElemento("#status-fim-jogo", true);
         renderizarResumoDesempenho(analiseGemini?.resumo_geral, respostasComWiki);
         renderizarCardsCorrecao(analiseGemini?.correcoes || [], respostasComWiki);
     } catch (erro) {
-        statusElemento.textContent = `Erro ao gerar correções: ${erro.message}`;
+        statusElemento.textContent = `Não foi possível obter a análise completa (${erro.message}). Exibindo correções básicas:`;
         console.error("Falha no fluxo de encerramento:", erro);
+        renderizarCorrecoesSemApi(respostas_usuario, tempoTotalSegundos);
     }
 }
 
@@ -215,6 +240,74 @@ function obterDificuldadeSelecionada() {
 }
 
 // ========================================
+// Verificação de disponibilidade da API Rest e Gemini
+// ========================================
+
+
+// Verifica se tem pelo menos uma chave API do Gemini cadastrada
+function verificarChaveApiCadastrada() {
+    return Array.isArray(chaves_gemini) && chaves_gemini.length > 0;
+}
+
+// Verifica se a API Rest está em execução
+async function verificarApiRestAtiva() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+    try {
+        const resp = await fetch(FLASK_HEALTH_URL, {
+            method: "GET",
+            signal: controller.signal
+        });
+        if (!resp.ok) {
+            api_rest_ativa = false;
+            return false;
+        }
+        const dados = await resp.json();
+        api_rest_ativa = dados?.status === "ok";
+        return api_rest_ativa;
+    } catch (erro) {
+        api_rest_ativa = false;
+        return false;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+// Cria e exibe um elemento de aviso caso a API Rest ou a chave do Gemini não estejam disponíveis
+function exibirAvisoConexoes(restAtiva, temChave) {
+    const avisoAnterior = document.querySelector("#aviso-conexoes");
+    if (avisoAnterior) {
+        avisoAnterior.remove();
+    }
+
+    if (restAtiva && temChave) {
+        return;
+    }
+
+    // Constroi uma string dependendo do que está ausente
+    const motivos = [];
+    if (!restAtiva) {
+        motivos.push("A API Rest (Flask) não está em execução.");
+    }
+    if (!temChave) {
+        motivos.push("Nenhuma chave API do Gemini foi cadastrada.");
+    }
+
+    const aviso = document.createElement("div");
+    aviso.id = "aviso-conexoes";
+    aviso.className = "aviso-conexoes";
+    aviso.innerHTML = `<strong>Aviso:</strong> ${motivos.join(" ")} O jogo funcionará no modo básico, sem dados da Wikipédia e sem análise do Gemini.`;
+
+    const header = document.querySelector("header");
+    if (header) {
+        header.insertAdjacentElement("afterend", aviso);
+    } else {
+        document.body.prepend(aviso);
+    }
+}
+
+// ========================================
 // Inicio de jogo e exibição das perguntas
 // ========================================
 
@@ -295,13 +388,15 @@ function registrarResposta(numero_pergunta, enunciado, resposta_usuario, respost
         respostas_usuario.push(nova_resposta);
     }
 
-    // Dispara o web scraping em paralelo enquanto o usuário avança para a próxima pergunta
-    dados_scraping[numero_pergunta - 1] = chamarApiFlaskWiki({
-        numero: numero_pergunta,
-        enunciado,
-        resposta_certa,
-        resposta_usuario
-    });
+    // Dispara o web scraping em paralelo apenas se a API Rest e a chave do Gemini estiverem disponíveis
+    if (api_rest_ativa && verificarChaveApiCadastrada()) {
+        dados_scraping[numero_pergunta - 1] = chamarApiFlaskWiki({
+            numero: numero_pergunta,
+            enunciado,
+            resposta_certa,
+            resposta_usuario
+        });
+    }
 
     atualizarStatsRodape();
 }
@@ -516,5 +611,60 @@ function renderizarCardsCorrecao(correcoes, respostasComWiki) {
         `;
 
         container.appendChild(card);
+    });
+}
+
+// Exibe o resumo e os cards de correção sem depender da API Rest nem do Gemini
+function renderizarCorrecoesSemApi(listaRespostas, tempoTotalSegundos = 0) {
+    const resumoContainer = document.querySelector("#resumo-desempenho");
+    const listaContainer = document.querySelector("#lista-correcoes");
+
+    const total = listaRespostas.length;
+    const acertos = listaRespostas.filter(i => i.resposta_usuario === i.resposta_certa).length;
+    const erros = total - acertos;
+    const percentual = total > 0 ? Math.round((acertos / total) * 100) : 0;
+
+    resumoContainer.innerHTML = `
+        <div class="widget-resumo">
+            <div class="resumo-cabecalho">
+                <span class="badge-nivel">Modo Básico</span>
+                <strong>${acertos}/${total} acertos (${percentual}%)</strong>
+            </div>
+            <div class="barra-progresso">
+                <div class="barra-preenchimento" style="width: ${percentual}%"></div>
+            </div>
+            <p class="diagnostico-geral">
+                Dificuldade: ${dificuldade_selecionada} · Erros: ${erros} · Tempo total: ${tempoTotalSegundos}s
+            </p>
+        </div>
+    `;
+
+    if (total === 0) {
+        listaContainer.innerHTML = `<p>Nenhuma pergunta foi respondida nesta partida.</p>`;
+        return;
+    }
+
+    listaRespostas.forEach((item) => {
+        const acertou = item.resposta_usuario === item.resposta_certa;
+        const card = document.createElement("article");
+        card.className = `pergunta-correcao ${acertou ? "card-acerto" : "card-erro"}`;
+
+        card.innerHTML = `
+            <div class="card-topo">
+                <span class="badge-status ${acertou ? "badge-ok" : "badge-err"}">
+                    ${acertou ? "Acertou" : "Errou"} · ${item.tempo_segundos}s
+                </span>
+            </div>
+
+            <h3 class="enunciado-pergunta">${item.numero}. ${item.enunciado}</h3>
+
+            <div class="respostas-resumo">
+                <span class="resp-user">Sua resposta: <strong>${item.resposta_usuario}</strong></span>
+                <br>
+                <span class="resp-certa">Resposta correta: <strong>${item.resposta_certa}</strong></span>
+            </div>
+        `;
+
+        listaContainer.appendChild(card);
     });
 }
