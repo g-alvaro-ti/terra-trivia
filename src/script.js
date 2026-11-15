@@ -35,14 +35,41 @@ async function terminarJogo() {
     ocultarElemento("#fim-jogo", false);
     ocultarElemento("#stats", true);
 
-    try {
-        const correcoes = await processarCorrecoesComGemini(respostas_usuario);
-        console.log("JSON com explicações e links da Wikipédia:", correcoes);
+    const statusElemento = document.querySelector("#status-fim-jogo");
+    const resumoElemento = document.querySelector("#resumo-desempenho");
+    const listaElemento = document.querySelector("#lista-correcoes");
 
-        // TODO: chamar a função criarCardCorrecao()
+    resumoElemento.innerHTML = "";
+    listaElemento.innerHTML = "";
+    ocultarElemento("#status-fim-jogo", false);
+    statusElemento.textContent = "Finalizando coleta de dados na Wikipédia e consultando Gemini...";
+
+    try {
+        // Aguarda as chamadas de scraping em paralelo iniciadas durante o jogo
+        const contextosWiki = await Promise.all(dados_scraping);
+
+        // Anexa os dados do scraping de cada questão antes de chamar o Gemini
+        const respostasComWiki = respostas_usuario.map((resp) => {
+            const wiki = contextosWiki.find(w => w && w.numero === resp.numero);
+            return {
+                ...resp,
+                wiki_correta: wiki ? wiki.contexto_correta : { encontrado: false },
+                wiki_usuario: wiki ? wiki.contexto_usuario : { encontrado: false }
+            };
+        });
+
+        // Chama o Gemini
+        const analiseGemini = await processarCorrecoesComGemini(respostasComWiki, {
+            dificuldade: dificuldade_selecionada,
+            tempo_total_segundos: Number(((Date.now() - inicio_partida_ms) / 1000).toFixed(1))
+        });
+
+        ocultarElemento("#status-fim-jogo", true);
+        renderizarResumoDesempenho(analiseGemini?.resumo_geral, respostasComWiki);
+        renderizarCardsCorrecao(analiseGemini?.correcoes || [], respostasComWiki);
     } catch (erro) {
-        // TODO: elaborar um elemento HTML pra exibir o erro
-        console.error("Falha ao obter correções do Gemini:", erro);
+        statusElemento.textContent = `Erro ao gerar correções: ${erro.message}`;
+        console.error("Falha no fluxo de encerramento:", erro);
     }
 }
 
@@ -242,16 +269,21 @@ async function chamarApiTrivia(dificuldade = "easy"){
 
 // Recebe os dados de uma pergunta respondida pelo usuário,
 // E as adiciona à lista de respostas, contendo a resposta escolhida e a resposta correta
-function registrarResposta(numero_pergunta, enunciado, resposta_usuario, resposta_certa){
+function registrarResposta(numero_pergunta, enunciado, resposta_usuario, resposta_certa, lista_alternativas) {
 
     // Verifica se essa pergunta já possui uma resposta registrada
     const indice = respostas_usuario.findIndex(resposta => resposta.numero === numero_pergunta);
 
+    const tempo_segundos = Number(((Date.now() - inicio_pergunta_ms) / 1000).toFixed(1));
     const nova_resposta = {
         numero: numero_pergunta,
-        enunciado: enunciado,
-        resposta_usuario: resposta_usuario,
-        resposta_certa: resposta_certa
+        dificuldade: dificuldade_selecionada,
+        categoria: "Science & Nature",
+        enunciado,
+        alternativas: lista_alternativas,
+        resposta_usuario,
+        resposta_certa,
+        tempo_segundos
     };
 
     // Se já respondeu, atualiza a resposta
@@ -303,10 +335,10 @@ function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta, respo
                 numero_pergunta,
                 enunciado,
                 alternativa,
-                resposta_certa
+                resposta_certa,
+                lista_alternativas
             );
 
-            // Delay de 500ms para o usuário ver a seleção antes de trocar a tela
             setTimeout(() => {
                 indice_pergunta_atual++;
                 if (indice_pergunta_atual < perguntas.length) {
@@ -397,10 +429,92 @@ async function chamarApiFlaskWiki(itemQuestao) {
     }
 }
 
-// Cria o elemento HTML da correção na página
-// O parâmetro acerto pode ser true ou false
-// Se o usuario acertou, apenas exibe seu enunciado e resposta indicando que acertou
-// Se o usuario errou, mostra a resposta correta e exibe uma explicação e um link para leitura
-function criarCardCorrecao(enunciado, acerto, resposta_certa, resposta_errada, explicacao, link, link_texto){
+function renderizarResumoDesempenho(resumo, lista) {
+    const container = document.querySelector("#resumo-desempenho");
+    const total = lista.length;
+    const acertos = lista.filter(i => i.resposta_usuario === i.resposta_certa).length;
+    const percentual = total > 0 ? Math.round((acertos / total) * 100) : 0;
 
+    container.innerHTML = `
+        <div class="widget-resumo">
+            <div class="resumo-cabecalho">
+                <span class="badge-nivel">${resumo?.nivel_dominio || "Resumo"}</span>
+                <strong>${acertos}/${total} acertos (${percentual}%)</strong>
+            </div>
+            <div class="barra-progresso">
+                <div class="barra-preenchimento" style="width: ${percentual}%"></div>
+            </div>
+            <p class="diagnostico-geral">${resumo?.diagnostico_curto || ""}</p>
+            <div class="chips-revisao">
+                ${(resumo?.topicos_revisar || []).map(t => `<span class="chip-alerta">Revisar: ${t}</span>`).join("")}
+            </div>
+        </div>
+    `;
+}
+
+function renderizarCardsCorrecao(correcoes, respostasComWiki) {
+    const container = document.querySelector("#lista-correcoes");
+
+    respostasComWiki.forEach((item) => {
+        const analise = correcoes.find(c => c.numero === item.numero) || {};
+        const acertou = item.resposta_usuario === item.resposta_certa;
+        const wikiCerta = item.wiki_correta || {};
+        const tituloLink = wikiCerta.pt?.disponivel ? wikiCerta.pt.titulo : wikiCerta.titulo_en;
+        const urlLink = wikiCerta.pt?.disponivel ? wikiCerta.pt.url : wikiCerta.url_en;
+        const resumoWiki = wikiCerta.pt?.disponivel ? wikiCerta.pt.resumo : wikiCerta.resumo_en;
+
+        const linhasTabela = (analise.comparacao_tabela || []).map(linha => `
+            <tr>
+                <th>${linha.atributo}</th>
+                <td>${linha.valor_usuario}</td>
+                <td>${linha.valor_correto}</td>
+            </tr>
+        `).join("");
+
+        const card = document.createElement("article");
+        card.className = `pergunta-correcao ${acertou ? "card-acerto" : "card-erro"}`;
+
+        card.innerHTML = `
+            <div class="card-topo">
+                <span class="badge-status ${acertou ? "badge-ok" : "badge-err"}">
+                    ${acertou ? "Acertou" : "Errou"} · ${item.tempo_segundos}s
+                </span>
+                ${wikiCerta.shortdescription ? `<span class="chip-meta">${wikiCerta.shortdescription}</span>` : ""}
+            </div>
+
+            <h3 class="enunciado-pergunta">${item.numero}. ${item.enunciado}</h3>
+
+            <div class="respostas-resumo">
+                <span class="resp-user">Sua resposta: <strong>${item.resposta_usuario}</strong></span>
+                <br>
+                <span class="resp-certa">Resposta correta: <strong>${item.resposta_certa}</strong></span>
+            </div>
+
+            <p class="explicacao-gemini">${analise.explicacao_objetiva || ""}</p>
+
+            ${linhasTabela ? `
+                <table class="tabela-comparativa">
+                    <thead>
+                        <tr>
+                            <th>Atributo (Infobox)</th>
+                            <th>${acertou ? "Contexto" : "Sua escolha"}</th>
+                            <th>Resposta certa</th>
+                        </tr>
+                    </thead>
+                    <tbody>${linhasTabela}</tbody>
+                </table>
+            ` : ""}
+
+            <div class="wiki-box">
+                ${wikiCerta.imagem_url ? `<img src="${wikiCerta.imagem_url}" alt="${tituloLink || ""}" class="wiki-thumb">` : ""}
+                <div class="wiki-texto">
+                    ${resumoWiki ? `<p class="wiki-resumo">${resumoWiki}</p>` : ""}
+                    ${analise.secao_recomendada ? `<span class="chip-secao">Explorar seção: ${analise.secao_recomendada}</span>` : ""}
+                    ${urlLink ? `<a href="${urlLink}" target="_blank" rel="noopener noreferrer" class="wiki-link">Ler na Wikipédia: ${tituloLink}</a>` : ""}
+                </div>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
 }
