@@ -154,7 +154,66 @@ def obter_dados_pt(soup_en: BeautifulSoup) -> dict:
 # ========================================
 
 def resolver_e_raspar_entidade(termo: str, pergunta: str, fallback: bool = False) -> dict:
-    return {"encontrado": False, "motivo": "teste"}
+    """
+    Resolve um artigo na Wikipédia EN e extrai metadados.
+    - Para correct_answer: fallback=True (resolve números/medidas via pergunta).
+    - Para user_answer: fallback=False (evita falsos positivos pra respostas com nomes inventados).
+    """
+    termo_limpo = html.unescape(termo or "").strip()
+    cache_key = f"{termo_limpo.lower()}::{fallback}::{pergunta[:40].lower()}"
+    if cache_key in _CACHE_ENTIDADE:
+        return _CACHE_ENTIDADE[cache_key]
+
+    if not termo_limpo or eh_numero_ou_medida(termo_limpo):
+        if not fallback:
+            return {"encontrado": False, "motivo": "numero_ou_medida"}
+        keywords = extrair_palavras_chave_pergunta(pergunta)
+        url_busca = f"{EN_BASE}/w/index.php?search={quote(keywords)}&fulltext=1"
+    else:
+        url_busca = f"{EN_BASE}/w/index.php?search={quote(termo_limpo)}"
+
+    url_atual, soup = buscar_html(url_busca)
+    if not soup:
+        return {"encontrado": False, "motivo": "erro_requisicao"}
+
+    if eh_pagina_busca(soup, url_atual):
+        primeiro = soup.select_one(".mw-search-result-heading a")
+        if not primeiro:
+            return {"encontrado": False, "motivo": "sem_resultados"}
+
+        titulo_sugerido = limpar_texto(primeiro.get_text(" ", strip=True)).lower()
+        if not fallback and termo_limpo.lower() not in titulo_sugerido and titulo_sugerido not in termo_limpo.lower():
+            return {"encontrado": False, "motivo": "distrator_sem_artigo"}
+
+        url_atual, soup = buscar_html(urljoin(EN_BASE, primeiro["href"]))
+        if not soup:
+            return {"encontrado": False, "motivo": "erro_redirecionamento"}
+
+    if eh_desambiguacao(soup):
+        url_desambig = resolver_desambiguacao(soup, pergunta)
+        if not url_desambig:
+            return {"encontrado": False, "motivo": "desambiguacao_nao_resolvida"}
+        url_atual, soup = buscar_html(url_desambig)
+        if not soup or eh_desambiguacao(soup):
+            return {"encontrado": False, "motivo": "desambiguacao_nao_resolvida"}
+
+    titulo_en_el = soup.select_one("#firstHeading")
+    shortdesc_el = soup.select_one(".shortdescription")
+
+    resultado = {
+        "encontrado": True,
+        "titulo_en": limpar_texto(titulo_en_el.get_text(" ", strip=True)) if titulo_en_el else termo_limpo,
+        "url_en": unquote(url_atual),
+        "shortdescription": limpar_texto(shortdesc_el.get_text(" ", strip=True)) if shortdesc_el else "",
+        "infobox": extrair_infobox(soup, max_itens=6),
+        "secoes": extrair_secoes(soup, max_secoes=5),
+        "imagem_url": extrair_imagem(soup),
+        "resumo_en": extrair_primeiro_paragrafo(soup),
+        "pt": obter_dados_pt(soup),
+    }
+
+    _CACHE_ENTIDADE[cache_key] = resultado
+    return resultado
 
 
 def processar_item_questao(item: dict) -> dict:
