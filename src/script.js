@@ -4,9 +4,21 @@ dados_scraping = []
 
 let dificuldade_selecionada = "easy";
 let api_rest_ativa = false;
+let iniciando_jogo = false;
 
 // Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe a primeira pergunta
 async function iniciarJogo() {
+    // Impede o jogo de iniciar novamente enquanto essa função ainda está executando
+    if (iniciando_jogo) {
+        return;
+    }
+
+    const botaoIniciar = document.querySelector(".botao-iniciar-jogo");
+    iniciando_jogo = true;
+    if (botaoIniciar) {
+        botaoIniciar.disabled = true;
+    }
+
     dificuldade_selecionada = obterDificuldadeSelecionada();
 
     // Verifica se a API Rest está em execução,
@@ -28,6 +40,7 @@ async function iniciarJogo() {
     perguntas = dados.results;
 
     // Ajusta a visibilidade das telas
+    ocultarElemento("#header", true);
     ocultarElemento("#inicio", true);
     ocultarElemento("#fim-jogo", true);
     ocultarElemento("#jogo", false);
@@ -36,6 +49,34 @@ async function iniciarJogo() {
     iniciarCronometro();
     atualizarStatsRodape();
     exibirPerguntaAtual();
+
+    iniciando_jogo = false;
+    if (botaoIniciar) {
+        botaoIniciar.disabled = false;
+    }
+}
+
+// Volta para a tela inicial para iniciar uma nova partida
+function jogarNovamente() {
+    pararCronometro();
+
+    const avisoConexoes = document.querySelector("#aviso-conexoes");
+    if (avisoConexoes) {
+        avisoConexoes.remove();
+    }
+
+    document.querySelector("#jogo").innerHTML = "";
+    document.querySelector("#resumo-desempenho").innerHTML = "";
+    document.querySelector("#lista-correcoes").innerHTML = "";
+    ocultarElemento("#status-fim-jogo", true);
+
+    respostas_usuario = [];
+    dados_scraping = [];
+    perguntas = [];
+    indice_pergunta_atual = 0;
+    inicio_partida_ms = 0;
+
+    configurarTelasIniciais();
 }
 
 // Exibe a tela de fim de jogo, e chama as APIs do Gemini e REST pra correção das perguntas.
@@ -106,6 +147,7 @@ function ocultarElemento(seletor, status = true){
 
 // Define o estado inicial da página assim que o script carrega
 function configurarTelasIniciais() {
+    ocultarElemento("#header", false);
     ocultarElemento("#inicio", false);
     ocultarElemento("#jogo", true);
     ocultarElemento("#fim-jogo", true);
@@ -154,26 +196,41 @@ function pararCronometro() {
 let chaves_gemini = []
 let chave_gemini_atual = ""
 
-// Adiciona a chave do input à lista de Chaves API, com validação
-function adicionarChave(chave){
-    if (!chave || typeof chave !== "string") {
-        console.warn("Nenhuma chave informada.");
-        return false;
+// Exibe na página as mensagens de validação/cadastro da chave API
+function exibirMensagemChave(texto, tipo = "aviso") {
+    const secaoApi = document.querySelector(".selecionar-api");
+    if (!secaoApi) return;
+
+    let elemento = secaoApi.querySelector(".mensagem-chave");
+    if (!elemento) {
+        elemento = document.createElement("p");
+        secaoApi.appendChild(elemento);
     }
 
-    const chaveFormatada = chave.trim();
+    elemento.className = `mensagem-chave mensagem-chave-${tipo}`;
+    elemento.textContent = texto;
+}
+
+// Adiciona a chave do input à lista de Chaves API, com validação
+function adicionarChave(chave){
+    const chaveFormatada = typeof chave === "string" ? chave.trim() : "";
+
+    if (!chaveFormatada) {
+        exibirMensagemChave("Nenhuma chave informada.", "aviso");
+        return false;
+    }
 
     // Regex para Chaves API do Gemini do tipo legado (AIzaSy...) ou tipo novo (AQ....)
     const regexGoogleKey = /^(AIzaSy[a-zA-Z0-9_-]{33}|AQ\.[a-zA-Z0-9_-]{20,})$/;
 
     if (!regexGoogleKey.test(chaveFormatada)) {
-        console.error("Falha ao adicionar: A chave não possui um formato válido do Gemini (deve iniciar com 'AIzaSy' ou 'AQ.').");
+        exibirMensagemChave("Falha ao adicionar: A chave não possui um formato válido do Gemini (deve iniciar com 'AIzaSy' ou 'AQ.').", "erro");
         return false;
     }
 
     // Evita chaves repetidas
     if (chaves_gemini.includes(chaveFormatada)) {
-        console.warn("A chave informada já foi adicionada anteriormente.");
+        exibirMensagemChave("A chave informada já foi adicionada anteriormente.", "aviso");
         return false;
     }
 
@@ -185,7 +242,7 @@ function adicionarChave(chave){
         chave_gemini_atual = chaveFormatada;
     }
 
-    console.log(`Chave API adicionada com sucesso! Total cadastradas: ${chaves_gemini.length}`);
+    exibirMensagemChave(`Chave API adicionada com sucesso! Total cadastradas: ${chaves_gemini.length}.`, "sucesso");
     return true;
 }
 
@@ -226,8 +283,10 @@ botaoInserirChave.addEventListener("click", () => {
     if (sucesso) {
         inputApiKey.value = "";
         statusChaves.textContent = `Chaves cadastradas: ${chaves_gemini.length} (rodízio ativo).`;
+    } else if (chaves_gemini.length === 0) {
+        statusChaves.textContent = "Nenhuma chave cadastrada (0).";
     } else {
-        statusChaves.textContent = `Chave inválida ou repetida. Total cadastradas: ${chaves_gemini.length}.`;
+        statusChaves.textContent = `Chaves cadastradas: ${chaves_gemini.length} (rodízio ativo).`;
     }
 });
 
@@ -422,6 +481,10 @@ function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta, respo
 
          // Executa quando o usuário seleciona uma alternativa
         input.addEventListener("change", () => {
+            // Desabilita todas as alternativas para evitar múltiplos cliques durante a mudança de pergunta
+            respostas.querySelectorAll('input[type="radio"]').forEach((radio) => {
+                radio.disabled = true;
+            });
 
             registrarResposta(
                 numero_pergunta,
