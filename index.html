@@ -8,7 +8,11 @@
 </head>
 <body>
     <header>
+        <div>🌎</div>
         <h1>Terra Trivia</h1>
+        <p>Desafie seu conhecimento de mundo em partidas rápidas de 5 perguntas.</p>
+        <p>Com apoio de Inteligência Artificial e dados reais da Wikipédia, o Terra Trivia avalia sua velocidade,
+            compara suas escolhas e entrega um painel completo com dicas de estudo ao fim do jogo.</p>
     </header>
 
     <section id="inicio">
@@ -50,41 +54,12 @@
             <button class="botao-iniciar-jogo">
                 Iniciar Jogo
             </button>
-            <button class="botao-terminar-jogo">
-                Terminar Jogo
-            </button>
         </div>
         
     </section>
     
     <section id="jogo">
 
-        <div class="pergunta">
-            <h2 class="enunciado-pergunta">
-                Pergunta
-            </h2>
-
-            <div class="respostas">
-                <label>
-                    <input type="radio" name="idioma" value="r1">
-                    Resposta 1
-                </label>
-                <label>
-                    <input type="radio" name="idioma" value="r2">
-                    Resposta 2
-                </label>
-                <label>
-                    <input type="radio" name="idioma" value="r3">
-                    Resposta 3
-                </label>
-                <label>
-                    <input type="radio" name="idioma" value="r4">
-                    Resposta 4
-                </label>
-            </div>
-
-        </div>
-        
     </section>
 
     <section id="fim-jogo">
@@ -101,39 +76,9 @@
         <div id="lista-correcoes" class="lista-correcoes"></div>
     </section>
 
-
-        <div class="pergunta-correcao">
-            <h2 class="enunciado-pergunta">
-                Pergunta
-            </h2>
-
-            <div class="certo-ou-errado">
-                Incorreto!
-            </div>
-
-            <div class="resposta-escolhida">
-                Resposta 1
-            </div>
-
-            <div class="resposta-certa">
-                Resposta 3
-            </div>
-
-            <div class="correcao-card">
-                <div class="correcao-gemini">
-                    Explicação do Gemini
-                </div>
-                <div class="correcao-leitura">
-                    Leia mais: <a>Link da Wikipedia</a>
-                </div>
-            </div>
-        </div>
-
-    </section>
-
     <footer id="stats">
         <ul>
-            <li class="iniciar"><button>Encerrar jogo</button></li>
+            <li class="botao-terminar-jogo"><button>Terminar jogo</button></li>
             <li class="perguntas">Pergunta: 1/5</li>
             <li class="erros">Perguntas erradas: 0</li>
             <li class="acertos">Perguntas acertadas: 0</li>

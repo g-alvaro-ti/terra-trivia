@@ -7,7 +7,6 @@ let api_rest_ativa = false;
 
 // Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe a primeira pergunta
 async function iniciarJogo() {
-    console.log("Botão pressionado!");
     dificuldade_selecionada = obterDificuldadeSelecionada();
 
     // Verifica se a API Rest está em execução,
@@ -16,12 +15,6 @@ async function iniciarJogo() {
         exibirAvisoConexoes(restAtiva, verificarChaveApiCadastrada());
         return restAtiva;
     });
-
-    // Ajusta a visibilidade das telas
-    ocultarElemento("#inicio", true);
-    ocultarElemento("#fim-jogo", true);
-    ocultarElemento("#jogo", false);
-    ocultarElemento("#stats", false);
 
     respostas_usuario = []
     dados_scraping = [];
@@ -34,7 +27,12 @@ async function iniciarJogo() {
     ]);
     perguntas = dados.results;
 
-    console.log("API processada!")
+    // Ajusta a visibilidade das telas
+    ocultarElemento("#inicio", true);
+    ocultarElemento("#fim-jogo", true);
+    ocultarElemento("#jogo", false);
+    ocultarElemento("#stats", false);
+
     iniciarCronometro();
     atualizarStatsRodape();
     exibirPerguntaAtual();
@@ -93,7 +91,6 @@ async function terminarJogo() {
         renderizarCardsCorrecao(analiseGemini?.correcoes || [], respostasComWiki);
     } catch (erro) {
         statusElemento.textContent = `Não foi possível obter a análise completa (${erro.message}). Exibindo correções básicas:`;
-        console.error("Falha no fluxo de encerramento:", erro);
         renderizarCorrecoesSemApi(respostas_usuario, tempoTotalSegundos);
     }
 }
@@ -493,14 +490,6 @@ function exibirPerguntaAtual() {
 // ========================================
 // Fim de jogo e correção
 // ========================================
-
-// Monta e retorna um prompt com o contexto da resposta do usuário, para ser usado com o Gemini
-function criarPromptWikipedia(enunciado, resposta_certa, resposta_errada){
-    const promptWikipedia = `
-
-    `
-    return promptWikipedia
-}
 
 // Faz a chamada pra API Rest, para retornar o conteúdo extraído de uma página da Wikipdeia a partir dos dados de uma questão
 async function chamarApiFlaskWiki(itemQuestao) {
