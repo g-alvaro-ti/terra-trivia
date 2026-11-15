@@ -6,6 +6,7 @@ let dificuldade_selecionada = "easy";
 // Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe a primeira pergunta
 async function iniciarJogo() {
     console.log("Botão pressionado!");
+    dificuldade_selecionada = obterDificuldadeSelecionada();
 
     // Ajusta a visibilidade das telas
     ocultarElemento("#inicio", true);
@@ -21,11 +22,14 @@ async function iniciarJogo() {
     perguntas = dados.results;
 
     console.log("API processada!")
+    iniciarCronometro();
+    atualizarStatsRodape();
     exibirPerguntaAtual();
 }
 
 // Exibe a tela de fim de jogo, e chama as APIs do Gemini e REST pra correção das perguntas.
 async function terminarJogo() {
+    pararCronometro();
     // Oculta a tela de perguntas e exibe o encerramento
     ocultarElemento("#jogo", true);
     ocultarElemento("#fim-jogo", false);
@@ -61,6 +65,39 @@ function configurarTelasIniciais() {
 
 configurarTelasIniciais()
 
+// ========================================
+// Atualização de dados do jogo no rodapé 
+// ========================================
+let inicio_partida_ms = 0;
+let inicio_pergunta_ms = 0;
+let intervalo_timer = null;
+
+function atualizarStatsRodape() {
+    const total = perguntas.length || 5;
+    const numeroExibido = Math.min(indice_pergunta_atual + 1, total);
+    const acertos = respostas_usuario.filter(r => r.resposta_usuario === r.resposta_certa).length;
+    const erros = respostas_usuario.length - acertos;
+    const segundos = inicio_partida_ms ? ((Date.now() - inicio_partida_ms) / 1000).toFixed(1) : "0.0";
+
+    document.querySelector("#stats .perguntas").textContent = `Pergunta: ${numeroExibido}/${total}`;
+    document.querySelector("#stats .acertos").textContent = `Perguntas acertadas: ${acertos}`;
+    document.querySelector("#stats .erros").textContent = `Perguntas erradas: ${erros}`;
+    document.querySelector("#stats .tempo").textContent = `Tempo total: ${segundos}s`;
+}
+
+function iniciarCronometro() {
+    pararCronometro();
+    inicio_partida_ms = Date.now();
+    inicio_pergunta_ms = Date.now();
+    intervalo_timer = setInterval(atualizarStatsRodape, 100);
+}
+
+function pararCronometro() {
+    if (intervalo_timer) {
+        clearInterval(intervalo_timer);
+        intervalo_timer = null;
+    }
+}
 // ========================================
 // Input das Chaves API e Rodízio
 // ========================================
@@ -233,43 +270,8 @@ function registrarResposta(numero_pergunta, enunciado, resposta_usuario, respost
         resposta_certa,
         resposta_usuario
     });
-}
 
-function processarPerguntas(perguntas){
-    let numero_pergunta = 1
-    perguntas.results.forEach((pergunta, index) => {
-        console.log(`Pergunta ${index + 1}:`);
-        console.log(pergunta.question);
-        console.log("Resposta correta:", pergunta.correct_answer);
-        console.log("Respostas incorretas:", pergunta.incorrect_answers);
-        console.log("----------------------");
-
-        const lista_alternativas = [];
-
-        // Sorteia a posição da resposta correta
-        const indice_resposta_certa = Math.floor(Math.random() * 4);
-
-        lista_alternativas[indice_resposta_certa] = pergunta.correct_answer;
-
-        // Distribui as respostas incorretas
-        let indice_incorretas = 0;
-
-        for(let i = 0; i < 4; i++){
-            if(i !== indice_resposta_certa){
-                lista_alternativas[i] = pergunta.incorrect_answers[indice_incorretas];
-                indice_incorretas++;
-            }
-        }
-
-        // Cria o elemento HTML na página
-        criarCardPergunta(
-            pergunta.question,
-            lista_alternativas,
-            numero_pergunta,
-            pergunta.correct_answer
-        );
-        numero_pergunta++
-    });
+    atualizarStatsRodape();
 }
 
 // Cria o elemento HTML da pergunta com o enunciado e alternativas
@@ -352,6 +354,7 @@ function exibirPerguntaAtual() {
     lista_alternativas.splice(indice_resposta_certa, 0, pergunta.correct_answer);
 
     // Cria o card da pergunta atual
+    inicio_pergunta_ms = Date.now()
     criarCardPergunta(
         pergunta.question,
         lista_alternativas,
