@@ -3,6 +3,7 @@ import html
 import re
 from urllib.parse import quote, unquote, urljoin
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
 
 HEADERS = {
     "User-Agent": "TerraTriviaBot/1.0 (Projeto Academico Web Services; contato-local)"
@@ -131,23 +132,90 @@ def resolver_desambiguacao(soup: BeautifulSoup, contexto_pergunta: str) -> str |
 # ========================================
 
 def extrair_infobox(soup: BeautifulSoup, max_itens: int = 6) -> list[dict]:
-    return []
+    """Extrai pares chave/valor da table.infobox"""
+    pares = []
+    chaves_vistas = set()
+
+    for tabela in soup.select("table.infobox"):
+        for tr in tabela.select("tr"):
+            celulas = tr.find_all(["th", "td"], recursive=False)
+            if len(celulas) != 2:
+                continue
+
+            chave = limpar_texto(celulas[0].get_text(" ", strip=True))
+            valor = limpar_texto(celulas[1].get_text(" ", strip=True))
+
+            if not chave or not valor or len(chave) > 45 or len(valor) > 120:
+                continue
+            if chave.lower() in chaves_vistas:
+                continue
+
+            chaves_vistas.add(chave.lower())
+            pares.append({"atributo": chave, "valor": valor})
+
+            if len(pares) >= max_itens:
+                return pares
+
+    return pares
 
 
 def extrair_primeiro_paragrafo(soup: BeautifulSoup, max_chars: int = 340) -> str:
+    for p in soup.select(".mw-parser-output p"):
+        if p.find_parent("table") or p.find_parent(class_="hatnote"):
+            continue
+        texto = limpar_texto(p.get_text(" ", strip=True))
+        if len(texto) > 45:
+            if len(texto) > max_chars:
+                return texto[:max_chars].rsplit(" ", 1)[0] + "..."
+            return texto
     return ""
 
 
 def extrair_secoes(soup: BeautifulSoup, max_secoes: int = 5) -> list[str]:
-    return []
+    ignorar = {"see also", "references", "external links", "further reading", "notes", "bibliography"}
+    secoes = []
+    for h in soup.select(".mw-parser-output .mw-heading2 h2, .mw-parser-output h2"):
+        texto = limpar_texto(h.get_text(" ", strip=True))
+        if texto and texto.lower() not in ignorar:
+            secoes.append(texto)
+        if len(secoes) >= max_secoes:
+            break
+    return secoes
 
 
 def extrair_imagem(soup: BeautifulSoup) -> str:
-    return ""
+    img = soup.select_one("table.infobox img") or soup.select_one(".mw-parser-output figure img")
+    if not img:
+        return ""
+    src = img.get("src", "")
+    if src.startswith("//"):
+        return "https:" + src
+    if src.startswith("/"):
+        return urljoin(EN_BASE, src)
+    return src
 
 
 def obter_dados_pt(soup_en: BeautifulSoup) -> dict:
-    return {"disponivel": False, "titulo": "", "url": "", "resumo": ""}
+    """Segue o link interlinguagem para pt.wikipedia.org para título, URL e resumo em PT."""
+    link_pt = soup_en.select_one('a.interlanguage-link-target[hreflang="pt"]')
+    if not link_pt or not link_pt.get("href"):
+        return {"disponivel": False, "titulo": "", "url": "", "resumo": ""}
+
+    pt_url = link_pt["href"]
+    url_final, soup_pt = buscar_html(pt_url)
+    if not soup_pt:
+        return {"disponivel": False, "titulo": "", "url": pt_url, "resumo": ""}
+
+    titulo_el = soup_pt.select_one("#firstHeading")
+    titulo_pt = limpar_texto(titulo_el.get_text(" ", strip=True)) if titulo_el else ""
+    resumo_pt = extrair_primeiro_paragrafo(soup_pt)
+
+    return {
+        "disponivel": True,
+        "titulo": titulo_pt,
+        "url": unquote(url_final),
+        "resumo": resumo_pt,
+    }
 
 # ========================================
 # Funções principais de execução do scraping geral
