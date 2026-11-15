@@ -20,29 +20,30 @@
         <div class="selecionar-dificuldade">
             <h3>Selecione a dificuldade das perguntas:</h2>
             <label>
-                <input type="radio" name="idioma" value="dificuldade-facil">
+                <input type="radio" name="dificuldade" value="easy">
                 Fácil
             </label>
             <label>
-                <input type="radio" name="idioma" value="dificuldade-medio">
+                <input type="radio" name="dificuldade" value="medium" checked>
                 Médio
             </label>
             <label>
-                <input type="radio" name="idioma" value="dificuldade-dificil">
+                <input type="radio" name="dificuldade" value="hard">
                 Difícil
             </label>
         </div>
 
         <div class="selecionar-api">
-            <h3>Insira uma Chave API do Gemini:</h3>
+            <h3>Insira uma ou mais Chaves API do Gemini:</h3>
             <p>
                 O Gemini é usado nesse site pra te dar explicações dinâmicas pras suas perguntas após cada partida, e também recomendar links para leitura.
                 <a href="https://aistudio.google.com/api-keys" target="_blank">Consiga sua Chave API aqui</a>
             </p>
-            <input type="text" name="api" class="input-api-key">
-            <button class="botao-inserir-chave">
+            <input type="text" name="api" class="input-api-key" placeholder="AIzaSy...">
+            <button type="button" class="botao-inserir-chave">
                 Inserir Chave API
             </button>
+            <p id="status-chaves" class="status-chaves">Nenhuma chave cadastrada (0).</p>
         </div>
 
         <div class="iniciar-jogo">
@@ -88,14 +89,17 @@
 
     <section id="fim-jogo">
         <div class="fim-texto">
-            <h2>
-                Fim de jogo!
-            </h2>
-            <p>
-                Veja como você se saiu em cada pergunta:
-            </p>
-
+            <h2>Fim de jogo!</h2>
+            <p>Confira seu desempenho, comparações da Wikipédia e diagnóstico personalizado:</p>
         </div>
+
+        <div id="status-fim-jogo" class="status-carregamento hidden">
+            Consultando Wikipédia e gerando análise visual no Gemini...
+        </div>
+
+        <div id="resumo-desempenho" class="resumo-desempenho"></div>
+        <div id="lista-correcoes" class="lista-correcoes"></div>
+    </section>
 
 
         <div class="pergunta-correcao">

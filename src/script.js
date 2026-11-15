@@ -1,3 +1,8 @@
+const FLASK_API_URL = "http://127.0.0.1:5000/api/wiki-context";
+dados_scraping = []
+
+let dificuldade_selecionada = "easy";
+
 // Exibe a tela de jogo na página, chama a API do OpenTrivia e exibe a primeira pergunta
 async function iniciarJogo() {
     console.log("Botão pressionado!");
@@ -9,9 +14,10 @@ async function iniciarJogo() {
     ocultarElemento("#stats", false);
 
     respostas_usuario = []
+    dados_scraping = [];
     indice_pergunta_atual = 0;
 
-    const dados = await chamarApiTrivia("medium");
+    const dados = await chamarApiTrivia(dificuldade_selecionada);
     perguntas = dados.results;
 
     console.log("API processada!")
@@ -129,11 +135,20 @@ let inputApiKey = document.querySelector(".input-api-key");
 botaoInserirChave.addEventListener("click", () => {
     const chave = inputApiKey.value;
     const sucesso = adicionarChave(chave);
+    const statusChaves = document.querySelector("#status-chaves");
 
     if (sucesso) {
-        inputApiKey.value = ""; // Limpa o campo após inserir com sucesso
+        inputApiKey.value = "";
+        statusChaves.textContent = `Chaves cadastradas: ${chaves_gemini.length} (rodízio ativo).`;
+    } else {
+        statusChaves.textContent = `Chave inválida ou repetida. Total cadastradas: ${chaves_gemini.length}.`;
     }
 });
+
+function obterDificuldadeSelecionada() {
+    const selecionado = document.querySelector('input[name="dificuldade"]:checked');
+    return selecionado ? selecionado.value : "medium";
+}
 
 // ========================================
 // Inicio de jogo e exibição das perguntas
@@ -210,6 +225,14 @@ function registrarResposta(numero_pergunta, enunciado, resposta_usuario, respost
     else{
         respostas_usuario.push(nova_resposta);
     }
+
+    // Dispara o web scraping em paralelo enquanto o usuário avança para a próxima pergunta
+    dados_scraping[numero_pergunta - 1] = chamarApiFlaskWiki({
+        numero: numero_pergunta,
+        enunciado,
+        resposta_certa,
+        resposta_usuario
+    });
 }
 
 function processarPerguntas(perguntas){
@@ -349,9 +372,26 @@ function criarPromptWikipedia(enunciado, resposta_certa, resposta_errada){
     return promptWikipedia
 }
 
-// Faz a chamada pra API Rest, para retornar parte do conteúdo de uma página
-async function chamarApiWikipedia(){
-
+// Faz a chamada pra API Rest, para retornar o conteúdo extraído de uma página da Wikipdeia a partir dos dados de uma questão
+async function chamarApiFlaskWiki(itemQuestao) {
+    try {
+        const resp = await fetch(FLASK_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(itemQuestao)
+        });
+        if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}`);
+        }
+        return await resp.json();
+    } catch (erro) {
+        console.warn(`Falha ao consultar Flask para questão ${itemQuestao.numero}:`, erro);
+        return {
+            numero: itemQuestao.numero,
+            contexto_correta: { encontrado: false },
+            contexto_usuario: { encontrado: false }
+        };
+    }
 }
 
 // Cria o elemento HTML da correção na página

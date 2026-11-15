@@ -285,13 +285,32 @@ def resolver_e_raspar_entidade(termo: str, pergunta: str, fallback: bool = False
 
 
 def processar_item_questao(item: dict) -> dict:
+    numero = item.get("numero")
+    pergunta = item.get("enunciado", "")
+    resposta_certa = item.get("resposta_certa", "")
+    resposta_usuario = item.get("resposta_usuario", "")
+    acertou = html.unescape(resposta_usuario).strip() == html.unescape(resposta_certa).strip()
+
+    dados_correta = resolver_e_raspar_entidade(
+        resposta_certa, pergunta, fallback=True
+    )
+
+    dados_usuario = {"encontrado": False, "motivo": "usuario_acertou"}
+    if not acertou and resposta_usuario:
+        dados_usuario = resolver_e_raspar_entidade(
+            resposta_usuario, pergunta, fallback=False
+        )
+
     return {
-        "numero": item.get("numero"),
-        "acertou": False,
-        "contexto_correta": resolver_e_raspar_entidade(item.get("resposta_certa", ""), item.get("enunciado", ""), True),
-        "contexto_usuario": {"encontrado": False, "motivo": "teste"},
+        "numero": numero,
+        "acertou": acertou,
+        "contexto_correta": dados_correta,
+        "contexto_usuario": dados_usuario,
     }
 
 
 def processar_lote_questoes(itens: list[dict]) -> list[dict]:
-    return [processar_item_questao(item) for item in itens]
+    if not itens:
+        return []
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        return list(executor.map(processar_item_questao, itens))
