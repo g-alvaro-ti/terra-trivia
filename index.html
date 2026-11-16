@@ -61,14 +61,14 @@
                 <p>
                     A API REST é um auxiliar opcional executado no seu computador para buscar resumos e tabelas reais na Wikipédia ao fim da partida. Sem ela, você ainda joga normalmente no modo básico.
                 </p>
-                <div class="api-rest-como-executar">
-                    <p class="api-rest-passo-titulo">Como executar no seu computador:</p>
+                <details class="api-rest-como-executar">
+                    <summary class="api-rest-passo-titulo">Como executar no seu computador:</summary>
                     <ol class="api-rest-passos">
                         <li>Tenha o <strong>Python</strong> instalado e baixe os arquivos deste projeto no GitHub.</li>
                         <li>No terminal, instale os pacotes (apenas uma vez): <code>pip install flask flask-cors requests beautifulsoup4</code></li>
                         <li>Entre na pasta <code>backend</code> do projeto e execute <code>python app.py</code>, e mantenha a janela aberta enquanto joga.</li>
                     </ol>
-                </div>
+                </details>
                 <div class="api-rest-monitor" role="status" aria-live="polite">
                     <span id="api-rest-badge" class="api-rest-badge api-rest-verificando">Verificando...</span>
                     <span id="api-rest-detalhe" class="api-rest-detalhe">Procurando servidor local em 127.0.0.1:5000...</span>
