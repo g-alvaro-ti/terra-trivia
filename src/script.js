@@ -21,38 +21,46 @@ async function iniciarJogo() {
 
     dificuldade_selecionada = obterDificuldadeSelecionada();
 
-    // Verifica se a API Rest está em execução,
-    // E exibe um aviso tanto se a Rest estiver ausente ou se não tiver Chaves API
-    const verificacaoRest = verificarApiRestAtiva().then((restAtiva) => {
-        exibirAvisoConexoes(restAtiva, verificarChaveApiCadastrada());
-        return restAtiva;
-    });
+    configurarTelaCarregamento(
+        "Carregando partida...",
+        "Buscando perguntas na API do OpenTrivia."
+    );
+    exibirTelaCarregamento(true);
 
     respostas_usuario = []
     dados_scraping = [];
     indice_pergunta_atual = 0;
 
-    // Espera a verificação da API Rest e a resposta da API do OpenTrivia
-    const [, dados] = await Promise.all([
-        verificacaoRest,
-        chamarApiTrivia(dificuldade_selecionada)
-    ]);
-    perguntas = dados.results;
+    try {
+        // Espera a verificação da API Rest e a resposta da API do OpenTrivia
+        const [restAtiva, dados] = await Promise.all([
+            verificarApiRestAtiva(),
+            chamarApiTrivia(dificuldade_selecionada)
+        ]);
+        perguntas = dados.results;
 
-    // Ajusta a visibilidade das telas
-    ocultarElemento("#header", true);
-    ocultarElemento("#inicio", true);
-    ocultarElemento("#fim-jogo", true);
-    ocultarElemento("#jogo", false);
-    ocultarElemento("#stats", false);
+        // Ajusta a visibilidade das telas
+        exibirTelaCarregamento(false);
+        ocultarElemento("#header", true);
+        ocultarElemento("#fim-jogo", true);
+        ocultarElemento("#jogo", false);
+        ocultarElemento("#stats", false);
 
-    iniciarCronometro();
-    atualizarStatsRodape();
-    exibirPerguntaAtual();
+        // Exibe um aviso caso a API Rest esteja ausente ou não tenha chaves do Gemini
+        exibirAvisoConexoes(restAtiva, verificarChaveApiCadastrada());
 
-    iniciando_jogo = false;
-    if (botaoIniciar) {
-        botaoIniciar.disabled = false;
+        iniciarCronometro();
+        atualizarStatsRodape();
+        exibirPerguntaAtual();
+    } catch (erro) {
+        exibirTelaCarregamento(false);
+        configurarTelasIniciais();
+        alert(`Não foi possível iniciar a partida (${erro.message}). Tente novamente.`);
+    } finally {
+        iniciando_jogo = false;
+        if (botaoIniciar) {
+            botaoIniciar.disabled = false;
+        }
     }
 }
 
@@ -82,10 +90,6 @@ function jogarNovamente() {
 // Exibe a tela de fim de jogo, e chama as APIs do Gemini e REST pra correção das perguntas.
 async function terminarJogo() {
     pararCronometro();
-    // Oculta a tela de perguntas e exibe o encerramento
-    ocultarElemento("#jogo", true);
-    ocultarElemento("#fim-jogo", false);
-    ocultarElemento("#stats", true);
 
     const statusElemento = document.querySelector("#status-fim-jogo");
     const resumoElemento = document.querySelector("#resumo-desempenho");
@@ -99,13 +103,19 @@ async function terminarJogo() {
 
     // Se faltar API Rest ou chave do Gemini, exibe apenas as correções básicas
     if (!api_rest_ativa || !verificarChaveApiCadastrada()) {
+        ocultarElemento("#jogo", true);
+        ocultarElemento("#fim-jogo", false);
+        ocultarElemento("#stats", true);
         ocultarElemento("#status-fim-jogo", true);
         renderizarCorrecoesSemApi(respostas_usuario, tempoTotalSegundos);
         return;
     }
 
-    ocultarElemento("#status-fim-jogo", false);
-    statusElemento.textContent = "Finalizando coleta de dados na Wikipédia e consultando Gemini...";
+    configurarTelaCarregamento(
+        "Gerando correções...",
+        "Finalizando coleta de dados na Wikipédia e consultando o Gemini."
+    );
+    exibirTelaCarregamento(true);
 
     try {
         // Aguarda as chamadas de scraping em paralelo iniciadas durante o jogo
@@ -127,10 +137,15 @@ async function terminarJogo() {
             tempo_total_segundos: tempoTotalSegundos
         });
 
+        exibirTelaCarregamento(false);
+        ocultarElemento("#fim-jogo", false);
         ocultarElemento("#status-fim-jogo", true);
         renderizarResumoDesempenho(analiseGemini?.resumo_geral, respostasComWiki);
         renderizarCardsCorrecao(analiseGemini?.correcoes || [], respostasComWiki);
     } catch (erro) {
+        exibirTelaCarregamento(false);
+        ocultarElemento("#fim-jogo", false);
+        ocultarElemento("#status-fim-jogo", false);
         statusElemento.textContent = `Não foi possível obter a análise completa (${erro.message}). Exibindo correções básicas:`;
         renderizarCorrecoesSemApi(respostas_usuario, tempoTotalSegundos);
     }
@@ -145,13 +160,51 @@ function ocultarElemento(seletor, status = true){
     elemento.classList.toggle("hidden", status)
 }
 
+// Configura o título e a mensagem exibidos na tela de carregamento
+function configurarTelaCarregamento(titulo = "Carregando...", mensagem = "") {
+    const tituloElemento = document.querySelector("#carregamento-titulo");
+    const mensagemElemento = document.querySelector("#carregamento-mensagem");
+
+    if (tituloElemento) {
+        tituloElemento.textContent = titulo;
+    }
+    if (mensagemElemento) {
+        mensagemElemento.textContent = mensagem;
+        ocultarElemento("#carregamento-mensagem", !mensagem);
+    }
+}
+
+// Exibe exclusivamente a tela de carregamento (ocultando o restante da página) ou a oculta
+function exibirTelaCarregamento(exibir = true) {
+    if (exibir) {
+        ocultarElemento("#header", true);
+        ocultarElemento("#jogo", true);
+        ocultarElemento("#fim-jogo", true);
+        ocultarElemento("#stats", true);
+
+        const avisoConexoes = document.querySelector("#aviso-conexoes");
+        if (avisoConexoes) {
+            avisoConexoes.classList.add("hidden");
+        }
+
+        ocultarElemento("#carregamento", false);
+    } else {
+        ocultarElemento("#carregamento", true);
+
+        const avisoConexoes = document.querySelector("#aviso-conexoes");
+        if (avisoConexoes) {
+            avisoConexoes.classList.remove("hidden");
+        }
+    }
+}
+
 // Define o estado inicial da página assim que o script carrega
 function configurarTelasIniciais() {
     ocultarElemento("#header", false);
-    ocultarElemento("#inicio", false);
     ocultarElemento("#jogo", true);
     ocultarElemento("#fim-jogo", true);
     ocultarElemento("#stats", true);
+    ocultarElemento("#carregamento", true);
 }
 
 configurarTelasIniciais()

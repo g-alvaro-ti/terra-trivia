@@ -8,58 +8,62 @@
 </head>
 <body>
     <header id="header">
-        <div>🌎</div>
-        <h1>Terra Trivia</h1>
-        <p>Desafie seu conhecimento de mundo em partidas rápidas de 5 perguntas.</p>
-        <p>Com apoio de Inteligência Artificial e dados reais da Wikipédia, o Terra Trivia avalia sua velocidade,
-            compara suas escolhas e entrega um painel completo com dicas de estudo ao fim do jogo.</p>
+        <div id="inicio">
+            <div>🌎</div>
+            <h1>Terra Trivia</h1>
+            <p>Desafie seu conhecimento de mundo em partidas rápidas de 5 perguntas.</p>
+            <p>Com apoio de Inteligência Artificial e dados reais da Wikipédia, o Terra Trivia avalia sua velocidade,
+                compara suas escolhas e entrega um painel completo com dicas de estudo ao fim do jogo.</p>
+        </div>
+
+        <div id="config">
+
+            <div class="selecionar-dificuldade">
+                <h3>Selecione a dificuldade das perguntas:</h2>
+                <label>
+                    <input type="radio" name="dificuldade" value="easy">
+                    Fácil
+                </label>
+                <label>
+                    <input type="radio" name="dificuldade" value="medium" checked>
+                    Médio
+                </label>
+                <label>
+                    <input type="radio" name="dificuldade" value="hard">
+                    Difícil
+                </label>
+            </div>
+
+            <div class="selecionar-api">
+                <h3>Insira uma ou mais Chaves API do Gemini:</h3>
+                <p>
+                    O Gemini é usado nesse site pra te dar explicações dinâmicas pras suas perguntas após cada partida, e também recomendar links para leitura.
+                    <a href="https://aistudio.google.com/api-keys" target="_blank">Consiga sua Chave API aqui</a>
+                </p>
+                <input type="text" name="api" class="input-api-key" placeholder="AIzaSy...">
+                <button type="button" class="botao-inserir-chave">
+                    Inserir Chave API
+                </button>
+                <p id="status-chaves" class="status-chaves">Nenhuma chave cadastrada (0).</p>
+            </div>
+
+            <div class="iniciar-jogo">
+                <button class="botao-iniciar-jogo">
+                    Iniciar Jogo
+                </button>
+            </div>
+        </div>
     </header>
-
-    <section id="inicio">
-
-        <div class="texto-introducao">
-
-        </div>
-
-        <div class="selecionar-dificuldade">
-            <h3>Selecione a dificuldade das perguntas:</h2>
-            <label>
-                <input type="radio" name="dificuldade" value="easy">
-                Fácil
-            </label>
-            <label>
-                <input type="radio" name="dificuldade" value="medium" checked>
-                Médio
-            </label>
-            <label>
-                <input type="radio" name="dificuldade" value="hard">
-                Difícil
-            </label>
-        </div>
-
-        <div class="selecionar-api">
-            <h3>Insira uma ou mais Chaves API do Gemini:</h3>
-            <p>
-                O Gemini é usado nesse site pra te dar explicações dinâmicas pras suas perguntas após cada partida, e também recomendar links para leitura.
-                <a href="https://aistudio.google.com/api-keys" target="_blank">Consiga sua Chave API aqui</a>
-            </p>
-            <input type="text" name="api" class="input-api-key" placeholder="AIzaSy...">
-            <button type="button" class="botao-inserir-chave">
-                Inserir Chave API
-            </button>
-            <p id="status-chaves" class="status-chaves">Nenhuma chave cadastrada (0).</p>
-        </div>
-
-        <div class="iniciar-jogo">
-            <button class="botao-iniciar-jogo">
-                Iniciar Jogo
-            </button>
-        </div>
-        
-    </section>
     
     <section id="jogo">
 
+    </section>
+
+    <section id="carregamento" class="hidden">
+        <div class="carregamento-conteudo">
+            <h2 id="carregamento-titulo">Carregando...</h2>
+            <p id="carregamento-mensagem"></p>
+        </div>
     </section>
 
     <section id="fim-jogo">
