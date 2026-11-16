@@ -1,89 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@500;600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <title>Terra Trivia</title>
+    <title>TerraTrivia</title>
 </head>
 <body>
     <header id="header">
         <div id="inicio">
-            <div>🌎</div>
-            <h1>Terra Trivia</h1>
-            <p>Desafie seu conhecimento de mundo em partidas rápidas de 5 perguntas.</p>
-            <p>Com apoio de Inteligência Artificial e dados reais da Wikipédia, o Terra Trivia avalia sua velocidade,
-                compara suas escolhas e entrega um painel completo com dicas de estudo ao fim do jogo.</p>
+            <div class="terra-slot" aria-hidden="true">🌎</div>
+            <div class="inicio-texto">
+                <h1>TerraTrivia</h1>
+                <p>Desafie seu conhecimento de mundo em partidas rápidas de 5 perguntas.</p>
+                <p>Com apoio de Inteligência Artificial e dados reais da Wikipédia, o TerraTrivia avalia sua velocidade,
+                    compara suas escolhas e entrega um painel completo com referências de estudo ao fim do jogo.</p>
+            </div>
         </div>
 
         <div id="config">
-
             <div class="selecionar-dificuldade">
-                <h3>Selecione a dificuldade das perguntas:</h2>
-                <label>
-                    <input type="radio" name="dificuldade" value="easy">
-                    Fácil
-                </label>
-                <label>
-                    <input type="radio" name="dificuldade" value="medium" checked>
-                    Médio
-                </label>
-                <label>
-                    <input type="radio" name="dificuldade" value="hard">
-                    Difícil
-                </label>
+                <h2>Selecione a dificuldade das perguntas:</h2>
+                <div class="opcoes-dificuldade">
+                    <label>
+                        <input type="radio" name="dificuldade" value="easy">
+                        <span>Fácil</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="dificuldade" value="medium" checked>
+                        <span>Médio</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="dificuldade" value="hard">
+                        <span>Difícil</span>
+                    </label>
+                </div>
             </div>
 
             <div class="selecionar-api">
-                <h3>Insira uma ou mais Chaves API do Gemini:</h3>
+                <h2>Insira uma ou mais Chaves API do Gemini:</h2>
                 <p>
-                    O Gemini é usado nesse site pra te dar explicações dinâmicas pras suas perguntas após cada partida, e também recomendar links para leitura.
-                    <a href="https://aistudio.google.com/api-keys" target="_blank">Consiga sua Chave API aqui</a>
+                    O Gemini é usado nesse site pra te dar explicações dinâmicas pras suas perguntas após cada partida, e também fazer comparações com dados da Wikipédia.
+                    <a href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer">Consiga sua Chave API aqui</a>
                 </p>
-                <input type="text" name="api" class="input-api-key" placeholder="AIzaSy...">
-                <button type="button" class="botao-inserir-chave">
-                    Inserir Chave API
-                </button>
+                <div class="api-input-grupo">
+                    <input type="text" name="api" class="input-api-key" placeholder="AIzaSy..." autocomplete="off" spellcheck="false">
+                    <button type="button" class="botao-inserir-chave">
+                        Inserir Chave API
+                    </button>
+                </div>
                 <p id="status-chaves" class="status-chaves">Nenhuma chave cadastrada (0).</p>
             </div>
 
             <div class="iniciar-jogo">
-                <button class="botao-iniciar-jogo">
+                <button type="button" class="botao-iniciar-jogo">
                     Iniciar Jogo
                 </button>
             </div>
         </div>
     </header>
     
-    <section id="jogo">
+    <section id="jogo" aria-live="polite">
 
     </section>
 
-    <section id="carregamento" class="hidden">
+    <section id="carregamento" class="hidden" role="status" aria-live="assertive">
         <div class="carregamento-conteudo">
+            <div class="carregamento-spinner" aria-hidden="true">
+                <svg viewBox="0 0 64 64" width="68" height="68" fill="none">
+                    <rect x="6" y="6" width="52" height="52" rx="4" stroke="#DFF1FD" stroke-width="4"/>
+                    <path d="M32 6H54C56.2 6 58 7.8 58 10V32" stroke="#0D63B8" stroke-width="5" stroke-linecap="square"/>
+                    <path d="M32 58H10C7.8 58 6 56.2 6 54V32" stroke="#107A41" stroke-width="5" stroke-linecap="square"/>
+                    <circle cx="32" cy="32" r="9" stroke="#0A3D6B" stroke-width="3.5"/>
+                </svg>
+            </div>
             <h2 id="carregamento-titulo">Carregando...</h2>
             <p id="carregamento-mensagem"></p>
         </div>
     </section>
 
     <section id="fim-jogo">
-        <div class="fim-texto">
-            <h2>Fim de jogo!</h2>
-            <p>Confira seu desempenho, comparações da Wikipédia e diagnóstico personalizado:</p>
-        </div>
+        <div class="fim-container">
+            <div class="fim-texto">
+                <h2>Fim de jogo!</h2>
+                <p>Confira seu desempenho, comparações da Wikipédia e diagnóstico personalizado:</p>
+            </div>
 
-        <div id="status-fim-jogo" class="status-carregamento hidden">
-            Consultando Wikipédia e gerando análise visual no Gemini...
-        </div>
+            <div id="status-fim-jogo" class="status-carregamento hidden">
+                Consultando Wikipédia e gerando análise visual no Gemini...
+            </div>
 
-        <div id="resumo-desempenho" class="resumo-desempenho"></div>
-        <div id="lista-correcoes" class="lista-correcoes"></div>
-        <button type="button" class="botao-jogar-novamente">Jogar Novamente</button>
+            <div id="resumo-desempenho" class="resumo-desempenho"></div>
+            <div id="lista-correcoes" class="lista-correcoes"></div>
+            <div class="fim-acoes">
+                <button type="button" class="botao-jogar-novamente">Jogar Novamente</button>
+            </div>
+        </div>
     </section>
 
     <footer id="stats">
         <ul>
-            <li class="botao-terminar-jogo"><button>Terminar jogo</button></li>
+            <li class="botao-terminar-jogo"><button type="button">Terminar jogo</button></li>
             <li class="perguntas">Pergunta: 1/5</li>
             <li class="erros">Perguntas erradas: 0</li>
             <li class="acertos">Perguntas acertadas: 0</li>
@@ -94,6 +114,7 @@
     <script src="src/prompt.js"></script>
     <script src="src/script.js"></script>
     <script src="src/action.js"></script>
+    <script src="src/ui.js"></script>
     
 </body>
 </html>

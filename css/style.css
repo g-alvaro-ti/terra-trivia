@@ -1,3 +1,1280 @@
+/* ==========================================================================
+   TerraTrivia - Design System Cartográfico & Alta Legibilidade
+   Branco estrutural + Azul Oceano / Verde Biosfera vibrantes + Texto branco
+   ========================================================================== */
+
+:root {
+    /* Neutros e tinta */
+    --bg-page: #ffffff;
+    --bg-surface: #f2f7fa;
+    --ink-main: #091e2c;
+    --ink-secondary: #324f61;
+    --ink-inverse: #ffffff;
+
+    /* Azul Oceano / Cobalto */
+    --blue-deep: #0a3d6b;
+    --blue-vibrant: #0d63b8;
+    --blue-bright: #1b8ce0;
+    --blue-tint: #dff1fd;
+    --blue-line: #8bc8f2;
+
+    /* Verde Biosfera / Esmeralda */
+    --green-deep: #0c4f2b;
+    --green-vibrant: #107a41;
+    --green-bright: #18a957;
+    --green-tint: #dcf7e6;
+    --green-line: #7cd8a2;
+
+    /* Estados semânticos */
+    --err-solid: #b91c1c;
+    --err-tint: #fde8e8;
+    --err-line: #e49b9b;
+
+    --warn-solid: #8a5300;
+    --warn-tint: #fef4d6;
+    --warn-line: #dfba56;
+
+    --border-subtle: #c8dfee;
+    --border-soft-blue: #bfd9ee;
+    --border-strong: #091e2c;
+
+    /* Geometria contida fora do #jogo */
+    --radius-xs: 2px;
+    --radius-sm: 3px;
+    --radius-md: 4px;
+    --radius-bubble: 16px;
+
+    /* Tipografia */
+    --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+    --font-sans: "Schibsted Grotesk", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --transition-fast: 150ms var(--ease-out);
+    --transition-base: 220ms var(--ease-out);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-page);
+    color: var(--ink-main);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    caret-color: var(--blue-vibrant);
+    overflow-x: hidden;
+}
+
+::selection {
+    background-color: var(--blue-vibrant);
+    color: var(--ink-inverse);
+}
+
+body.travar-scroll {
+    overflow: hidden;
+    height: 100dvh;
+}
+
 .hidden {
     display: none !important;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+button,
+input {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible,
+label:has(input:focus-visible) {
+    outline: 3px solid var(--blue-bright);
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   1. HEADER / TELA INICIAL (#header: 40% #inicio + 60% #config no desktop)
+   ========================================================================== */
+
+#header {
+    flex: 1 0 auto;
+    width: 100%;
+    min-height: 100dvh;
+    background-color: var(--bg-page);
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    align-items: stretch;
+}
+
+/* --- Coluna Esquerda (40%): #inicio --- */
+#inicio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.25rem 1rem;
+    background-color: var(--bg-page);
+}
+
+/* Espaço grande reservado para o planeta Terra (sem círculo ao redor) */
+.terra-slot {
+    width: 100%;
+    min-height: clamp(170px, 32vh, 360px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(9.5rem, 34vw, 17rem);
+    line-height: 1;
+    transition: transform var(--transition-base);
+}
+
+.terra-slot:hover {
+    transform: scale(1.03);
+}
+
+.inicio-texto {
+    width: 100%;
+    max-width: 36rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+#inicio h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 9.5vw, 4.75rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--green-vibrant);
+}
+
+#inicio p {
+    margin: 0;
+    font-size: 0.98rem;
+    color: var(--ink-secondary);
+    text-wrap: pretty;
+}
+
+#inicio p:first-of-type {
+    font-weight: 700;
+    font-size: 1.06rem;
+    color: var(--ink-main);
+    text-wrap: balance;
+}
+
+/* --- Coluna Direita (60%): #config --- */
+#config {
+    width: 100%;
+    background-color: var(--bg-page);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+/* Seção superior: Dificuldade direto sobre fundo branco */
+.selecionar-dificuldade {
+    background-color: transparent;
+    padding: 0.25rem 0 1.25rem;
+    border-bottom: 1.5px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.selecionar-dificuldade h2,
+.selecionar-dificuldade h3 {
+    margin: 0;
+    padding-bottom: 0.55rem;
+    border-bottom: 2.5px solid var(--blue-vibrant);
+    font-family: var(--font-display);
+    font-size: clamp(1.22rem, 1.8vw, 1.48rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--blue-deep);
+}
+
+.opcoes-dificuldade {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.opcoes-dificuldade label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 0.65rem;
+    background-color: var(--bg-page);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: var(--blue-deep);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.opcoes-dificuldade label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+}
+
+.opcoes-dificuldade label:hover {
+    background-color: var(--blue-deep);
+    border-color: var(--blue-deep);
+    color: var(--ink-inverse);
+}
+
+.opcoes-dificuldade label:has(input:checked) {
+    background-color: var(--blue-vibrant);
+    border-color: var(--blue-deep);
+    color: var(--ink-inverse);
+}
+
+/* Seção central: Chave API Gemini direto sobre fundo branco */
+.selecionar-api {
+    background-color: transparent;
+    padding: 0.25rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 1rem;
+}
+
+.selecionar-api h2,
+.selecionar-api h3 {
+    margin: 0;
+    padding-bottom: 0.55rem;
+    border-bottom: 2.5px solid var(--green-vibrant);
+    font-family: var(--font-display);
+    font-size: clamp(1.22rem, 1.8vw, 1.48rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--green-deep);
+}
+
+.selecionar-api > p {
+    margin: 0;
+    font-size: 0.96rem;
+    color: var(--ink-secondary);
+    text-wrap: pretty;
+}
+
+.selecionar-api a {
+    color: var(--blue-vibrant);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.selecionar-api a:hover {
+    color: var(--blue-deep);
+}
+
+.api-input-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.input-api-key {
+    width: 100%;
+    min-height: 50px;
+    padding: 0.65rem 0.9rem;
+    background-color: var(--bg-page);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--ink-main);
+    transition: border-color var(--transition-fast);
+}
+
+.input-api-key:focus {
+    border-color: var(--green-vibrant);
+}
+
+.input-api-key::placeholder {
+    color: var(--ink-secondary);
+}
+
+.botao-inserir-chave {
+    min-height: 50px;
+    padding: 0.65rem 1.25rem;
+    background-color: var(--green-vibrant);
+    border: 2px solid var(--green-deep);
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--ink-inverse);
+    white-space: nowrap;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.botao-inserir-chave:hover {
+    background-color: var(--green-deep);
+}
+
+.botao-inserir-chave:active {
+    transform: translateY(1px);
+}
+
+.status-chaves {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--green-deep);
+}
+
+.selecionar-api > .mensagem-chave {
+    margin: 0;
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink-inverse);
+}
+
+.mensagem-chave-sucesso {
+    background-color: var(--green-vibrant);
+    color: var(--ink-inverse);
+}
+
+.mensagem-chave-aviso {
+    background-color: var(--warn-solid);
+    color: var(--ink-inverse);
+}
+
+.mensagem-chave-erro {
+    background-color: var(--err-solid);
+    color: var(--ink-inverse);
+}
+
+/* Base centralizada: Botão Iniciar Jogo com fundo vibrante e fonte branca */
+.iniciar-jogo {
+    display: flex;
+    justify-content: center;
+}
+
+.botao-iniciar-jogo {
+    width: 100%;
+    max-width: 380px;
+    min-height: 58px;
+    padding: 0.85rem 2rem;
+    background-color: var(--green-vibrant);
+    border: 2px solid var(--green-deep);
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--ink-inverse);
+    letter-spacing: -0.01em;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.botao-iniciar-jogo:hover:not(:disabled) {
+    background-color: var(--green-deep);
+    transform: translateY(-1px);
+}
+
+.botao-iniciar-jogo:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.botao-iniciar-jogo:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+/* ==========================================================================
+   2. AVISO DE CONEXÕES (entre #header e #jogo)
+   ========================================================================== */
+
+.aviso-conexoes {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    background-color: var(--green-vibrant);
+    border-bottom: 2px solid var(--green-deep);
+    color: var(--ink-inverse);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* ==========================================================================
+   3. TELA DE CARREGAMENTO (#carregamento: tela cheia, sem scroll, centralizada)
+   ========================================================================== */
+
+#carregamento {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    z-index: 1000;
+    overflow: hidden;
+    background-color: var(--bg-page);
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+}
+
+.carregamento-conteudo {
+    max-width: 30rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.carregamento-spinner {
+    width: 68px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: terra-spin 1.1s linear infinite;
+}
+
+@keyframes terra-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#carregamento-titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.55rem, 4vw, 2rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--blue-deep);
+}
+
+#carregamento-mensagem {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--ink-secondary);
+}
+
+/* ==========================================================================
+   4. TELA DE JOGO (#jogo) - Pergunta ampla + alternativas bem espaçadas
+   ========================================================================== */
+
+#jogo {
+    flex: 1 0 auto;
+    width: 100%;
+    background-color: var(--bg-page);
+    padding: clamp(2rem, 4.5vh, 3.5rem) clamp(1rem, 4vw, 3rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#jogo .pergunta {
+    width: 100%;
+    max-width: 1140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(3rem, 6.5vh, 5rem);
+    animation: pergunta-entrar 200ms var(--ease-out);
+}
+
+@keyframes pergunta-entrar {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Balão amplo da pergunta (semelhante à imagem de referência, com borda azul suave) */
+#jogo .enunciado-pergunta {
+    position: relative;
+    width: 100%;
+    max-width: 1040px;
+    margin: 1.5rem 0 0;
+    padding: clamp(2.8rem, 5.8vh, 4.25rem) clamp(1.5rem, 4.5vw, 3.5rem);
+    background-color: var(--bg-page);
+    border: 2.5px solid var(--border-soft-blue);
+    border-radius: var(--radius-bubble);
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.75vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    text-align: center;
+    text-wrap: balance;
+    color: var(--ink-main);
+}
+
+/* Ponta triangular inferior */
+#jogo .enunciado-pergunta::after {
+    content: "";
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    background-color: var(--bg-page);
+    border-right: 2.5px solid var(--border-soft-blue);
+    border-bottom: 2.5px solid var(--border-soft-blue);
+    transform: translateX(-50%) rotate(45deg);
+}
+
+/* Balão ? sobreposto ao topo em verde vibrante + branco */
+.pergunta-interrogacao {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    width: 62px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--green-vibrant);
+    border: 2.5px solid var(--bg-page);
+    border-radius: 50% 50% 50% 6px;
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ink-inverse);
+}
+
+/* Alternativas amplas e espaçadas (pílulas com letra circular a/b/c/d) */
+#jogo .respostas {
+    width: 100%;
+    max-width: 1140px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.15rem, 2.5vw, 2rem);
+}
+
+#jogo .respostas label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1.05rem;
+    min-height: clamp(68px, 10vh, 92px);
+    padding: 0.45rem 1.4rem 0.45rem 0.45rem;
+    background-color: var(--bg-page);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: 999px;
+    font-size: clamp(1rem, 1.35vw, 1.18rem);
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink-main);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+#jogo .respostas label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+}
+
+.alt-letra {
+    flex: 0 0 50px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--blue-vibrant);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 800;
+    text-transform: lowercase;
+    color: var(--ink-inverse);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+#jogo .respostas label span:last-child {
+    padding: 0.35rem 0;
+}
+
+#jogo .respostas label:hover {
+    background-color: var(--blue-tint);
+    border-color: var(--blue-vibrant);
+    transform: translateY(-2px);
+}
+
+#jogo .respostas label:hover .alt-letra {
+    background-color: var(--blue-deep);
+}
+
+#jogo .respostas label.alternativa-certa {
+    background-color: var(--green-vibrant);
+    border-color: var(--green-deep);
+    color: var(--ink-inverse);
+}
+
+#jogo .respostas label.alternativa-certa .alt-letra {
+    background-color: var(--green-deep);
+    color: var(--ink-inverse);
+}
+
+#jogo .respostas label.alternativa-errada {
+    background-color: var(--err-solid);
+    border-color: #8f1414;
+    color: var(--ink-inverse);
+}
+
+#jogo .respostas label.alternativa-errada .alt-letra {
+    background-color: #8f1414;
+    color: var(--ink-inverse);
+}
+
+#jogo .respostas label:has(input:disabled) {
+    cursor: default;
+}
+
+/* ==========================================================================
+   5. RODAPÉ AZUL DE ESTATÍSTICAS (#stats)
+   ========================================================================== */
+
+#stats {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    width: 100%;
+    background-color: var(--blue-deep);
+    border-top: 3px solid var(--blue-bright);
+    color: var(--ink-inverse);
+    padding: 0.85rem 1.25rem;
+}
+
+#stats ul {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 1180px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem 0.9rem;
+    align-items: center;
+}
+
+#stats li {
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+#stats .botao-terminar-jogo {
+    grid-column: 1 / -1;
+}
+
+#stats .botao-terminar-jogo button {
+    width: 100%;
+    min-height: 42px;
+    padding: 0.45rem 1.1rem;
+    background-color: var(--blue-vibrant);
+    border: 2px solid var(--ink-inverse);
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--ink-inverse);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+#stats .botao-terminar-jogo button:hover {
+    background-color: var(--ink-inverse);
+    color: var(--blue-deep);
+}
+
+#stats .tempo {
+    font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   6. TELA DE FIM DE JOGO (#fim-jogo) - Relatório estruturado e Wiki Dossier
+   ========================================================================== */
+
+#fim-jogo {
+    flex: 1 0 auto;
+    width: 100%;
+    background-color: var(--bg-surface);
+    padding: 2rem 1rem 3.5rem;
+}
+
+.fim-container {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.fim-texto {
+    padding: 0.25rem 0;
+}
+
+.fim-texto::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 2.5px;
+    margin-top: 1rem;
+    background-color: var(--border-soft-blue);
+}
+
+.fim-texto h2 {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.85rem, 5vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink-main);
+}
+
+.fim-texto p {
+    margin: 0;
+    color: var(--ink-secondary);
+    font-size: 1rem;
+}
+
+.status-carregamento {
+    padding: 0.85rem 1rem;
+    background-color: var(--warn-solid);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-sm);
+    color: var(--ink-inverse);
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+/* --- Widget de Resumo Geral --- */
+.widget-resumo {
+    background-color: var(--bg-page);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.resumo-cabecalho {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.badge-nivel {
+    display: inline-block;
+    padding: 0.32rem 0.85rem;
+    background-color: var(--blue-deep);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--ink-inverse);
+}
+
+.resumo-cabecalho strong {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-main);
+}
+
+.barra-progresso {
+    width: 100%;
+    height: 14px;
+    background-color: var(--blue-tint);
+    border: 1.5px solid var(--border-soft-blue);
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+}
+
+.barra-preenchimento {
+    height: 100%;
+    background-color: var(--green-vibrant);
+    transition: width 450ms var(--ease-out);
+}
+
+.diagnostico-geral {
+    margin: 0;
+    color: var(--ink-main);
+    font-size: 0.98rem;
+    text-wrap: pretty;
+}
+
+.chips-revisao {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chips-revisao:empty {
+    display: none;
+}
+
+.chip-alerta {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    background-color: var(--blue-vibrant);
+    border-radius: var(--radius-xs);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink-inverse);
+}
+
+/* --- Lista e Cards de Correção --- */
+.lista-correcoes {
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+}
+
+.lista-correcoes > p {
+    margin: 0;
+    padding: 1.25rem;
+    background-color: var(--bg-page);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-md);
+    color: var(--ink-secondary);
+    text-align: center;
+}
+
+.pergunta-correcao {
+    background-color: var(--bg-page);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Zona 1: Topo + Enunciado */
+.card-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1.5px solid var(--border-subtle);
+}
+
+.badge-status {
+    display: inline-block;
+    padding: 0.28rem 0.75rem;
+    border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.badge-ok {
+    background-color: var(--green-vibrant);
+    color: var(--ink-inverse);
+}
+
+.badge-err {
+    background-color: var(--err-solid);
+    color: var(--ink-inverse);
+}
+
+.chip-meta {
+    display: inline-block;
+    padding: 0.26rem 0.65rem;
+    background-color: var(--blue-tint);
+    border: 1px solid var(--blue-line);
+    border-radius: var(--radius-xs);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--blue-deep);
+}
+
+.pergunta-correcao .enunciado-pergunta {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.18rem;
+    font-weight: 700;
+    line-height: 1.32;
+    color: var(--ink-main);
+}
+
+/* Zona 2: Respostas comparadas */
+.respostas-resumo {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+    padding: 0.8rem;
+    background-color: var(--bg-surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    font-size: 0.94rem;
+}
+
+.respostas-resumo br {
+    display: none;
+}
+
+.resp-user,
+.resp-certa {
+    display: block;
+    padding: 0.45rem 0.65rem;
+    background-color: var(--bg-page);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+}
+
+.card-erro .resp-user {
+    border-color: var(--err-line);
+    background-color: var(--err-tint);
+    color: var(--err-solid);
+}
+
+.resp-certa {
+    border-color: var(--green-line);
+    background-color: var(--green-tint);
+    color: var(--green-deep);
+}
+
+/* Zona 3: Explicação do Gemini */
+.explicacao-gemini {
+    margin: 0;
+    padding: 0.8rem 0.95rem;
+    background-color: var(--blue-tint);
+    border: 1.5px solid var(--blue-line);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    color: var(--ink-main);
+    text-wrap: pretty;
+}
+
+.explicacao-gemini:empty {
+    display: none;
+}
+
+/* Zona 4: Tabela Comparativa Infobox */
+.tabela-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1.5px solid var(--border-soft-blue);
+    border-radius: var(--radius-sm);
+}
+
+.tabela-comparativa {
+    width: 100%;
+    min-width: 440px;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    text-align: left;
+}
+
+.tabela-comparativa thead th {
+    background-color: var(--blue-deep);
+    color: var(--ink-inverse);
+    font-family: var(--font-display);
+    font-weight: 700;
+    padding: 0.65rem 0.85rem;
+    border-bottom: 2px solid var(--border-soft-blue);
+}
+
+.tabela-comparativa tbody th,
+.tabela-comparativa tbody td {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: top;
+}
+
+.tabela-comparativa tbody th {
+    font-weight: 700;
+    color: var(--ink-main);
+    background-color: var(--bg-surface);
+    width: 32%;
+}
+
+.tabela-comparativa tbody tr:last-child th,
+.tabela-comparativa tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Zona 5: Dossiê Wikipédia (.wiki-box) */
+.wiki-box {
+    background-color: var(--bg-surface);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.wiki-box:not(:has(img, p, span, a)) {
+    display: none;
+}
+
+.wiki-thumb {
+    width: 100%;
+    max-width: 168px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background-color: var(--bg-page);
+    border: 1.5px solid var(--border-soft-blue);
+    border-radius: var(--radius-xs);
+}
+
+.wiki-texto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    min-width: 0;
+}
+
+.wiki-resumo {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--ink-main);
+    text-wrap: pretty;
+}
+
+.chip-secao {
+    display: inline-block;
+    padding: 0.28rem 0.7rem;
+    background-color: var(--blue-vibrant);
+    border-radius: var(--radius-xs);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink-inverse);
+}
+
+.wiki-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.95rem;
+    background-color: var(--blue-deep);
+    border: 1.5px solid var(--blue-deep);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink-inverse);
+    text-decoration: none;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.wiki-link:hover {
+    background-color: var(--green-vibrant);
+    border-color: var(--green-deep);
+}
+
+.wiki-link::after {
+    content: "↗";
+    font-size: 0.95em;
+    line-height: 1;
+}
+
+/* Ações do fim de jogo */
+.fim-acoes {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.5rem;
+}
+
+.botao-jogar-novamente {
+    width: 100%;
+    max-width: 340px;
+    min-height: 54px;
+    padding: 0.75rem 2rem;
+    background-color: var(--green-vibrant);
+    border: 2px solid var(--green-deep);
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ink-inverse);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.botao-jogar-novamente:hover {
+    background-color: var(--green-deep);
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   7. RESPONSIVIDADE PROGRESSIVA (Tablet & Desktop)
+   ========================================================================== */
+
+@media (min-width: 640px) {
+    .api-input-grupo {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .input-api-key {
+        flex: 1 1 auto;
+    }
+
+    #jogo .respostas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: clamp(1.1rem, 2.4vw, 1.85rem);
+    }
+
+    .respostas-resumo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+    }
+
+    .wiki-box:not(.wiki-sem-imagem):has(.wiki-thumb) {
+        grid-template-columns: 144px minmax(0, 1fr);
+    }
+
+    .wiki-thumb {
+        width: 144px;
+        height: 116px;
+        aspect-ratio: auto;
+    }
+}
+
+@media (min-width: 768px) {
+    #stats {
+        padding: 0.85rem 2rem;
+    }
+
+    #stats ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    #stats .botao-terminar-jogo {
+        grid-column: auto;
+    }
+
+    #stats .botao-terminar-jogo button {
+        width: auto;
+    }
+
+    .pergunta-correcao {
+        padding: 1.5rem;
+    }
+}
+
+/* Distribuição 40% (#inicio) / 60% (#config) preenchendo a tela inteira */
+@media (min-width: 900px) {
+    #header {
+        grid-template-columns: minmax(320px, 40%) minmax(460px, 1fr);
+        padding: clamp(1.25rem, 2.5vw, 2rem);
+        gap: clamp(1.25rem, 2.5vw, 2rem);
+    }
+
+    #inicio {
+        padding: clamp(1.5rem, 3vw, 2.5rem);
+        justify-content: space-evenly;
+    }
+
+    .terra-slot {
+        min-height: clamp(210px, 38vh, 380px);
+        font-size: clamp(11rem, 21vw, 18rem);
+    }
+
+    #config {
+        padding: clamp(1.5rem, 2.8vw, 2.25rem);
+        justify-content: space-evenly;
+        gap: 1.5rem;
+    }
+
+    .selecionar-dificuldade,
+    .selecionar-api {
+        padding: 0.5rem 0 1.25rem;
+        gap: 1.15rem;
+    }
+
+    .selecionar-api {
+        padding-bottom: 0.5rem;
+    }
+
+    .opcoes-dificuldade label {
+        min-height: 66px;
+        font-size: 1.05rem;
+    }
+
+    .botao-iniciar-jogo {
+        max-width: 440px;
+        min-height: 64px;
+    }
+}
+
+/* ==========================================================================
+   8. PREFERÊNCIA DE MOVIMENTO REDUZIDO
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

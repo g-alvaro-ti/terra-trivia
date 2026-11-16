@@ -532,12 +532,16 @@ function criarCardPergunta(enunciado, lista_alternativas, numero_pergunta, respo
         input.name = `pergunta-${numero_pergunta}`;
         input.value = `r${index + 1}`;
 
-         // Executa quando o usuário seleciona uma alternativa
+        // Executa quando o usuário seleciona uma alternativa
         input.addEventListener("change", () => {
             // Desabilita todas as alternativas para evitar múltiplos cliques durante a mudança de pergunta
             respostas.querySelectorAll('input[type="radio"]').forEach((radio) => {
                 radio.disabled = true;
             });
+
+            label.classList.add(
+                alternativa === resposta_certa ? "alternativa-certa" : "alternativa-errada"
+            );
 
             registrarResposta(
                 numero_pergunta,
