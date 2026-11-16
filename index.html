@@ -55,6 +55,26 @@
                 <p id="status-chaves" class="status-chaves">Nenhuma chave cadastrada (0).</p>
             </div>
 
+            <div class="selecionar-api-rest">
+                <h2>API REST local (Wikipédia):</h2>
+                <p>
+                    A API REST é um auxiliar opcional executado no seu computador para buscar resumos e tabelas reais na Wikipédia ao fim da partida. Sem ela, você ainda joga normalmente no modo básico.
+                </p>
+                <div class="api-rest-como-executar">
+                    <p class="api-rest-passo-titulo">Como executar no seu computador:</p>
+                    <ol class="api-rest-passos">
+                        <li>Tenha o <strong>Python</strong> instalado e baixe os arquivos deste projeto no GitHub.</li>
+                        <li>No terminal, instale os pacotes (apenas uma vez): <code>pip install flask flask-cors requests beautifulsoup4</code></li>
+                        <li>Entre na pasta <code>backend</code> do projeto e execute <code>python app.py</code>, e mantenha a janela aberta enquanto joga.</li>
+                    </ol>
+                </div>
+                <div class="api-rest-monitor" role="status" aria-live="polite">
+                    <span id="api-rest-badge" class="api-rest-badge api-rest-verificando">Verificando...</span>
+                    <span id="api-rest-detalhe" class="api-rest-detalhe">Procurando servidor local em 127.0.0.1:5000...</span>
+                    <button type="button" id="botao-verificar-rest" class="botao-verificar-rest">Verificar</button>
+                </div>
+            </div>
+
             <div class="iniciar-jogo">
                 <button type="button" class="botao-iniciar-jogo">
                     Iniciar Jogo

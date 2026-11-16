@@ -275,7 +275,8 @@ label:has(input:focus-visible) {
 /* Seção central: Chave API Gemini direto sobre fundo branco */
 .selecionar-api {
     background-color: transparent;
-    padding: 0.25rem 0;
+    padding: 0.25rem 0 1.25rem;
+    border-bottom: 1.5px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -389,6 +390,155 @@ label:has(input:focus-visible) {
 .mensagem-chave-erro {
     background-color: var(--err-solid);
     color: var(--ink-inverse);
+}
+
+/* Seção inferior: Monitor e guia da API REST local direto sobre fundo branco */
+.selecionar-api-rest {
+    background-color: transparent;
+    padding: 0.25rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.9rem;
+}
+
+.selecionar-api-rest h2 {
+    margin: 0;
+    padding-bottom: 0.55rem;
+    border-bottom: 2.5px solid var(--blue-vibrant);
+    font-family: var(--font-display);
+    font-size: clamp(1.22rem, 1.8vw, 1.48rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--blue-deep);
+}
+
+.selecionar-api-rest > p {
+    margin: 0;
+    font-size: 0.94rem;
+    color: var(--ink-secondary);
+    text-wrap: pretty;
+}
+
+.api-rest-monitor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    background-color: var(--bg-page);
+    border: 2px solid var(--border-soft-blue);
+    border-radius: var(--radius-sm);
+}
+
+.api-rest-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-xs);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--ink-inverse);
+    white-space: nowrap;
+}
+
+.api-rest-badge::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+    flex-shrink: 0;
+}
+
+.api-rest-verificando {
+    background-color: var(--blue-deep);
+}
+
+.api-rest-online {
+    background-color: var(--green-vibrant);
+}
+
+.api-rest-offline {
+    background-color: var(--blue-deep);
+}
+
+.api-rest-detalhe {
+    flex: 1 1 180px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink-secondary);
+}
+
+.botao-verificar-rest {
+    min-height: 40px;
+    padding: 0.45rem 0.95rem;
+    background-color: var(--blue-vibrant);
+    border: 2px solid var(--blue-deep);
+    border-radius: var(--radius-sm);
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--ink-inverse);
+    white-space: nowrap;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.botao-verificar-rest:hover:not(:disabled) {
+    background-color: var(--blue-deep);
+}
+
+.botao-verificar-rest:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.botao-verificar-rest:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.api-rest-como-executar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding-left: 0.85rem;
+    border-left: 3px solid var(--border-soft-blue);
+}
+
+.api-rest-passo-titulo {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--blue-deep);
+}
+
+.api-rest-passos {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.88rem;
+    color: var(--ink-secondary);
+}
+
+.api-rest-passos li::marker {
+    color: var(--blue-vibrant);
+    font-weight: 700;
+}
+
+.api-rest-passos code {
+    display: inline-block;
+    padding: 0.1rem 0.42rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-soft-blue);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--blue-deep);
+    overflow-wrap: anywhere;
 }
 
 /* Base centralizada: Botão Iniciar Jogo com fundo vibrante e fonte branca */
@@ -1239,19 +1389,20 @@ label:has(input:focus-visible) {
     }
 
     #config {
-        padding: clamp(1.5rem, 2.8vw, 2.25rem);
+        padding: clamp(1.35rem, 2.5vw, 2rem);
         justify-content: space-evenly;
-        gap: 1.5rem;
-    }
-
-    .selecionar-dificuldade,
-    .selecionar-api {
-        padding: 0.5rem 0 1.25rem;
         gap: 1.15rem;
     }
 
-    .selecionar-api {
-        padding-bottom: 0.5rem;
+    .selecionar-dificuldade,
+    .selecionar-api,
+    .selecionar-api-rest {
+        padding: 0.35rem 0 1.15rem;
+        gap: 0.95rem;
+    }
+
+    .selecionar-api-rest {
+        padding-bottom: 0.35rem;
     }
 
     .opcoes-dificuldade label {
