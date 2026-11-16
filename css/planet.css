@@ -1,0 +1,122 @@
+/* ==========================================================================
+   TerraTrivia - Planeta 3D Low-Poly (Three.js)
+   Estilos isolados para #inicio e #carregamento, com foco em mobile-first
+   e prevenção absoluta de rolagem horizontal ou extravasamento.
+   ========================================================================== */
+
+.terra-slot,
+.carregamento-terra-slot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0 auto;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Slot da tela inicial (#inicio) */
+.terra-slot {
+    max-width: min(100%, 380px);
+    height: clamp(220px, 34dvh, 340px);
+    min-height: 220px;
+    font-size: initial;
+    line-height: normal;
+    transition: none;
+}
+
+.terra-slot:hover {
+    transform: none;
+}
+
+/* Slot central da tela de carregamento (#carregamento) */
+.carregamento-terra-slot {
+    max-width: min(100%, 270px);
+    height: clamp(165px, 32dvh, 260px);
+    flex-shrink: 0;
+}
+
+/* Garante que o conteúdo pré-existente de #carregamento permaneça abaixo do planeta
+   sem estourar a altura ou largura da viewport em telas móveis */
+#carregamento {
+    padding: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+#carregamento .carregamento-conteudo {
+    width: 100%;
+    max-width: min(30rem, 100%);
+    max-height: calc(100dvh - 1.5rem);
+    gap: clamp(0.55rem, 1.8dvh, 1rem);
+}
+
+#carregamento .carregamento-spinner {
+    width: clamp(46px, 8dvh, 68px);
+    height: clamp(46px, 8dvh, 68px);
+    flex-shrink: 0;
+}
+
+#carregamento .carregamento-spinner svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Canvas Three.js contido estritamente nos limites do componente */
+.terra-planet-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    touch-action: pan-y;
+    cursor: grab;
+    outline: none;
+}
+
+.terra-planet-canvas:active {
+    cursor: grabbing;
+}
+
+/* Fallback SVG caso WebGL/Three.js não esteja disponível */
+.terra-planet-fallback {
+    display: block;
+    width: auto;
+    height: 82%;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Telas muito baixas (ex.: celular em modo paisagem) */
+@media (max-height: 540px) {
+    .carregamento-terra-slot {
+        height: clamp(110px, 34dvh, 170px);
+        max-width: 190px;
+    }
+
+    #carregamento .carregamento-conteudo {
+        gap: 0.45rem;
+    }
+}
+
+/* Desktop e telas largas */
+@media (min-width: 900px) {
+    .terra-slot {
+        max-width: min(100%, 440px);
+        height: clamp(270px, 42dvh, 400px);
+        min-height: 270px;
+    }
+
+    .carregamento-terra-slot {
+        max-width: min(100%, 310px);
+        height: clamp(220px, 34dvh, 300px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .terra-planet-canvas {
+        cursor: default;
+    }
+}

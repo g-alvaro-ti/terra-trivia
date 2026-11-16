@@ -7,12 +7,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@500;600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/planet.css">
     <title>TerraTrivia</title>
 </head>
 <body>
     <header id="header">
         <div id="inicio">
-            <div class="terra-slot" aria-hidden="true">🌎</div>
+            <div class="terra-slot" aria-hidden="true"></div>
             <div class="inicio-texto">
                 <h1>TerraTrivia</h1>
                 <p>Desafie seu conhecimento de mundo em partidas rápidas de 5 perguntas.</p>
@@ -89,6 +90,7 @@
 
     <section id="carregamento" class="hidden" role="status" aria-live="assertive">
         <div class="carregamento-conteudo">
+            <div class="carregamento-terra-slot" aria-hidden="true"></div>
             <div class="carregamento-spinner" aria-hidden="true">
                 <svg viewBox="0 0 64 64" width="68" height="68" fill="none">
                     <rect x="6" y="6" width="52" height="52" rx="4" stroke="#DFF1FD" stroke-width="4"/>
@@ -135,6 +137,8 @@
     <script src="src/script.js"></script>
     <script src="src/action.js"></script>
     <script src="src/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/build/three.min.js"></script>
+    <script src="src/planet.js"></script>
     
 </body>
 </html>
